@@ -1,0 +1,6 @@
+node_modules/
+dist/
+*.log
+*.ply
+*.mp4
+contact-sheet.jpg
