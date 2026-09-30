@@ -1,3 +1,14 @@
 import { defineConfig } from 'vite';
+import { resolve } from 'node:path';
 
-export default defineConfig({ base: './' });
+export default defineConfig({
+  base: './',
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(import.meta.dirname, 'index.html'),
+        lab: resolve(import.meta.dirname, 'viewer-lab.html')
+      }
+    }
+  }
+});

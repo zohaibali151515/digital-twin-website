@@ -4,3 +4,5 @@ dist/
 *.ply
 *.mp4
 contact-sheet.jpg
+assets/*/web/
+public/assets/maikada/web/*.spz

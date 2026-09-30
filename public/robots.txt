@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://zohaibali151515.github.io/digital-twin-website/sitemap.xml

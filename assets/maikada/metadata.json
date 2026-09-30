@@ -1,0 +1,16 @@
+{
+  "project": "Maikada Cafe",
+  "source": {
+    "path": "../../Maikada Cafe/AmarTest09-Cafe_2026-09-26-15-21-40.fjdslamp2_2.ply",
+    "bytes": 653624780,
+    "sha256": "8489c771cddc73332f3b7d3f44c6160f9505002d5b0c4ce69fa658f876534823",
+    "format": "Gaussian PLY",
+    "gaussians": 2769590,
+    "sphericalHarmonicBands": 3,
+    "storage": "Local master, excluded from public Git repository"
+  },
+  "web": {
+    "status": "experimental",
+    "strategy": "Streamed SOG with full-detail LOD 0 and lower-detail spatial LODs"
+  }
+}
