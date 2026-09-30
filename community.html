@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#101517" />
+    <meta name="robots" content="noindex, follow" />
+    <title>Community 3D Showcase | Digital Twin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/style.css" />
+    <style>
+      body{background:#101517;color:#f4f1e9}
+      .demo-nav{display:flex;align-items:center;justify-content:space-between;padding-block:24px}
+      .demo-nav .back{font-size:14px;color:#b7c6b9}
+      .demo-head{padding-block:50px 30px}
+      .demo-head h1{font-size:clamp(42px,6vw,80px);line-height:1.05;letter-spacing:-.055em;max-width:900px;margin:16px 0}
+      .demo-head p:last-child{max-width:700px;color:#c9cec8;line-height:1.6;font-size:18px}
+      .demo-frame{position:relative;background:#1e2822;border:1px solid #435347;border-radius:12px;overflow:hidden;height:min(72vh,760px);min-height:430px}
+      .demo-frame iframe{display:block;width:100%;height:100%;border:0}
+      .demo-meta{display:grid;grid-template-columns:1fr 1fr;gap:42px;padding-block:30px 75px}
+      .demo-meta p{line-height:1.65;color:#b9c8bd;margin:0 0 12px}
+      .demo-meta a{color:#c9f27b;text-decoration:underline;text-underline-offset:3px}
+      .demo-cta{padding:60px 0 85px;border-top:1px solid #3c4b40}
+      .demo-cta h2{font-size:clamp(32px,4vw,58px);letter-spacing:-.04em;line-height:1.08;margin:12px 0 27px;max-width:750px}
+      @media(max-width:700px){.demo-head{padding-block:35px 20px}.demo-frame{min-height:0;height:65vh}.demo-meta{grid-template-columns:1fr;gap:8px;padding-bottom:55px}}
+    </style>
+  </head>
+  <body>
+    <header class="demo-nav shell"><a class="brand" href="./index.html" aria-label="Digital Twin home"><span class="brand-mark"><i></i><i></i><i></i></span><span>DIGITAL<span class="brand-light">TWIN</span></span></a><a class="back" href="./index.html#community-title">← More spaces</a></header>
+    <main id="community-page" class="shell"></main>
+    <footer class="footer shell"><a class="brand" href="./index.html"><span class="brand-mark"><i></i><i></i><i></i></span><span>DIGITAL<span class="brand-light">TWIN</span></span></a><span>Real places, ready to explore.</span><span>Lahore, Pakistan</span></footer>
+    <script type="module" src="/src/community-page.js"></script>
+  </body>
+</html>

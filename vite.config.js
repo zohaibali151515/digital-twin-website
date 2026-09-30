@@ -7,7 +7,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(import.meta.dirname, 'index.html'),
-        lab: resolve(import.meta.dirname, 'viewer-lab.html')
+        maikada: resolve(import.meta.dirname, 'maikada.html'),
+        community: resolve(import.meta.dirname, 'community.html')
       }
     }
   }

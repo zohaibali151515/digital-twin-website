@@ -15,8 +15,8 @@ ROOT = Path(__file__).resolve().parents[1]
 META = json.loads((ROOT / "assets/maikada/metadata.json").read_text(encoding="utf-8"))
 SOURCE = (ROOT / "assets/maikada" / META["source"]["path"]).resolve()
 WORK = ROOT / "assets/maikada/web"
-STREAMED = WORK / "streamed-sh0"
-PUBLIC = ROOT / "public/assets/maikada/web"
+STREAMED = WORK / "streamed-sh3-full"
+PUBLIC = ROOT / "public/assets/maikada/web-sh3-full"
 CLI = ROOT / "node_modules/.bin" / ("splat-transform.cmd" if os.name == "nt" else "splat-transform")
 
 
@@ -45,18 +45,14 @@ def main():
     if not CLI.exists():
         raise FileNotFoundError("Run npm install before generating assets")
     WORK.mkdir(parents=True, exist_ok=True)
-    for level, percent in ((1, "50%"), (2, "20%")):
-        output = WORK / f"maikada-lod{level}.ply"
-        if not output.exists():
-            run(SOURCE, "--decimate-adaptive", percent, output)
     index = STREAMED / "lod-meta.json"
     if not index.exists():
         STREAMED.mkdir(parents=True, exist_ok=True)
-        run("-g", "cpu", "--lod-chunk-count", "256", "--lod-chunk-extent", "8",
-            SOURCE, "-l", "0", "-r", "-90,0,0",
-            WORK / "maikada-lod1.ply", "-l", "1", "-r", "-90,0,0",
-            WORK / "maikada-lod2.ply", "-l", "2", "-r", "-90,0,0",
-            index, "--filter-nan", "--filter-harmonics", "0")
+        # Maikada's interior becomes unusable when SH bands or splats are removed.
+        # GPU adapter 0 (Intel UHD) completed a three-band 554K test; adapter 1
+        # (GTX 1650 Max-Q) failed with DXGI_ERROR_DEVICE_HUNG on this machine.
+        run("-g", "0", "-i", "1", "--lod-chunk-count", "64", "--lod-chunk-extent", "4",
+            SOURCE, "-l", "0", "-r", "90,0,0", index, "--filter-nan")
     run(index, "--info", "null")
     print(f"Validated web output: {index}")
     print("To stage it for the website, copy the entire streamed directory to", PUBLIC)

@@ -5,4 +5,8 @@ dist/
 *.mp4
 contact-sheet.jpg
 assets/*/web/
-public/assets/maikada/web/*.spz
+public/assets/maikada/web/
+public/assets/maikada/web-v2/
+public/assets/maikada/web-sh3-test/
+public/assets/maikada/web-sh3-full/
+public/*.spz

@@ -6,25 +6,39 @@ const status = document.querySelector('#status');
 window.maikadaMetrics = { startedAt: performance.now(), firstFrameMs: null };
 const settings = defaultSettings();
 settings.background.color = [0.055, 0.078, 0.071];
-settings.cameras = [{ initial: { position: [12, 5, 14], target: [2, -1, 1], fov: 75 } }];
+const view = new URLSearchParams(location.search);
+const contentUrl = `${import.meta.env.BASE_URL}assets/maikada/web-sh3-full/lod-meta.json`;
+const vector = (key, fallback) => {
+  const values = view.get(key)?.split(',').map(Number);
+  return values?.length === 3 && values.every(Number.isFinite) ? values : fallback;
+};
+settings.cameras = [{ initial: { position: vector('position', [0.8, -2.2, 0.8]), target: vector('target', [0.8, -2.2, 3]), fov: 75 } }];
 
 try {
   const viewer = await createViewer({
     container: document.querySelector('#viewer'),
     settings,
-    contentUrl: `${import.meta.env.BASE_URL}assets/maikada/web/lod-meta.json`,
+    contentUrl,
     posterUrl: `${import.meta.env.BASE_URL}maikada-poster.jpg`,
-    webgl: true
+    renderer: 'webgl',
+    noanim: true,
+    fullload: view.has('fullload')
   });
   window.maikadaViewer = viewer;
-  viewer.events.on('progress:changed', progress => { status.textContent = `Loading scene · ${Math.round(progress)}%`; });
+  status.textContent = 'Loading environment…';
+  viewer.events.on('progress:changed', progress => {
+    status.textContent = progress >= 100 ? 'Building 3D scene…' : `Loading environment · ${Math.round(progress)}%`;
+  });
   viewer.events.on('loaded:changed', loaded => {
     if (loaded) {
+      viewer.state.animationPaused = true;
+      viewer.state.cameraMode = 'orbit';
+      viewer.resetCamera();
       window.maikadaMetrics.firstFrameMs = performance.now() - window.maikadaMetrics.startedAt;
-      status.textContent = 'Scene ready · refining detail';
+      status.textContent = 'Digital Twin ready';
     }
   });
-  viewer.events.on('error:changed', error => { if (error) status.textContent = `Scene error: ${error}`; });
+  viewer.events.on('error:changed', error => { if (error) status.textContent = 'Could not open 3D scene'; });
 } catch (error) {
   console.error(error);
   status.textContent = 'Could not start viewer';

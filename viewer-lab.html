@@ -3,14 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101517" />
     <meta name="robots" content="noindex" />
-    <title>Maikada viewer lab · Digital Twin</title>
+    <title>Maikada Cafe 3D Walkthrough | Digital Twin</title>
+    <style>
+      :root{--header-height:60px;font-family:system-ui,sans-serif;color:#eef2ed;background:#101517}
+      *{box-sizing:border-box}body{margin:0}
+      header{height:var(--header-height);display:flex;align-items:center;justify-content:space-between;gap:18px;padding:0 18px;background:#111a17;border-bottom:1px solid #33443a}
+      header>div{display:flex;align-items:center;gap:20px;min-width:0}
+      header a{color:#c9f27b;text-decoration:none;font-size:13px;white-space:nowrap}
+      header strong{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      #status{font-size:12px;color:#bdcbbd;text-align:right}
+      #viewer{position:absolute;inset:var(--header-height) 0 0}
+      @media(max-width:520px){:root{--header-height:76px}header{display:block;padding:10px 14px}header>div{justify-content:space-between}#status{display:block;text-align:left;margin-top:8px;font-size:11px}}
+    </style>
   </head>
-  <body style="margin:0;background:#101517;color:#eef2ed;font-family:system-ui,sans-serif">
-    <header style="height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:#111a17">
-      <strong>Maikada · streamed viewer lab</strong><span id="status">Preparing viewer…</span>
-    </header>
-    <main id="viewer" style="position:absolute;inset:56px 0 0"></main>
+  <body>
+    <header><div><a href="./maikada.html" aria-label="Back to Maikada project">← Project</a><strong>Maikada Cafe · 3D walkthrough</strong></div><span id="status" role="status" aria-live="polite">Preparing Digital Twin…</span></header>
+    <main id="viewer" aria-label="Interactive Maikada Cafe 3D scene"></main>
     <script type="module" src="/src/viewer-lab.js"></script>
   </body>
 </html>

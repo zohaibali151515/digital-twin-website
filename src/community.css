@@ -1,0 +1,23 @@
+.community-gallery{background:#17211d;padding:90px 0 100px}
+.community-gallery .section-head{margin-bottom:34px}
+.community-disclosure{max-width:680px;color:#aebbb3;font-size:14px;line-height:1.6;margin:0 0 28px}
+.community-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.community-card{display:block;background:#212d27;border:1px solid #3c4b40;border-radius:11px;overflow:hidden;transition:transform .2s,border-color .2s}
+.community-card:hover,.community-card:focus-visible{transform:translateY(-4px);border-color:#c9f27b}
+.community-card img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#15201a}
+.community-card-body{display:grid;gap:9px;padding:19px 20px 22px}
+.community-card small{color:#c9f27b;font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
+.community-card h3{font-family:'Space Grotesk',sans-serif;font-size:22px;line-height:1.2;margin:0}
+.community-card p{color:#b9c8bd;font-size:13px;line-height:1.55;margin:0}
+.community-card .community-credit{color:#95a99c;font-size:11px}
+.community-card .community-link{color:#c9f27b;font-size:13px;font-weight:700;margin-top:5px}
+.about-section{background:#14201b;padding:100px 0;border-top:1px solid #3c4b40}
+.about-inner{display:grid;grid-template-columns:1.1fr 1fr;gap:9vw;align-items:start}
+.about-inner h2{font-family:'Space Grotesk',sans-serif;font-size:clamp(40px,5vw,72px);line-height:1.08;letter-spacing:-.05em;margin:18px 0 0}
+.about-inner h2 em{font-style:normal;color:#c9f27b}
+.about-inner>div:last-child{padding-top:37px}
+.about-inner p:not(.eyebrow){color:#c9cec8;font-size:18px;line-height:1.7;margin:0 0 22px}
+.about-inner a{color:#c9f27b;font-weight:700}
+@media(max-width:950px){.community-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.about-section{padding:68px 0}.about-inner{grid-template-columns:1fr;gap:20px}.about-inner>div:last-child{padding-top:0}}
+@media(max-width:600px){.community-gallery{padding:65px 0}.community-grid{grid-template-columns:1fr}.community-card img{aspect-ratio:16/10}}
