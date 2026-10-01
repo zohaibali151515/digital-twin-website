@@ -27,6 +27,8 @@ The script verifies the master, rotates the scene upright, and writes `maikada-l
 
 The old 28.8 MB preview can be rebuilt with `python scripts/convert_ply.py`, but it randomly samples 900,000 Gaussians and drops view-dependent color. It is kept outside the public build as a failed quality experiment. The progressive bands contain 2,768,886 Gaussians in total and preserve three spherical-harmonic bands. The lower 37.9 MB file becomes interactive first; the upper 19.1 MB file completes the lounge. The two band files total 57.0 MB. The conversion omits 704 Gaussians compared with the full 2,769,590-splat reference, a 0.025% difference; visual comparison showed no meaningful difference in tested views. See [architecture and test evidence](docs/architecture.md).
 
+`public/maikada-poster.jpg` is a clean frame captured from the current full-detail browser viewer. Replace it after a new scan or a major viewer change so the preview reflects the real interactive result. Portrait screens use a wider camera field of view to show more of each room.
+
 ## Add a project
 
 1. Record permission to publish, the public project name and location. For a third-party demo, record the exact model license, commercial and redistribution terms, modification rights, hosting rights and attribution.

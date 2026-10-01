@@ -88,7 +88,7 @@ async function openTour() {
     target.appendChild(renderer.domElement);
     const scene = new THREE.Scene();
     scene.background = new THREE.Color('#101517');
-    const camera = new THREE.PerspectiveCamera(70, target.clientWidth / target.clientHeight, 0.02, 200);
+    const camera = new THREE.PerspectiveCamera(target.clientWidth < 600 ? 95 : 70, target.clientWidth / target.clientHeight, 0.02, 200);
     camera.position.set(0, -3.5, 2);
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.target.set(1, -3.5, 2);
@@ -113,6 +113,7 @@ async function openTour() {
     });
     const resize = () => {
       camera.aspect = target.clientWidth / target.clientHeight;
+      camera.fov = target.clientWidth < 600 ? 95 : 70;
       camera.updateProjectionMatrix();
       renderer.setSize(target.clientWidth, target.clientHeight);
     };
