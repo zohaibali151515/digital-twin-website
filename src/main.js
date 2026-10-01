@@ -30,7 +30,7 @@ app.innerHTML = `
     </section>
     <section class="ticker" aria-label="Services"><div>REALITY CAPTURE <span>✳</span> 3D WALKTHROUGHS <span>✳</span> WEB EXPERIENCES <span>✳</span> DIGITAL SPACES <span>✳</span> REALITY CAPTURE <span>✳</span> 3D WALKTHROUGHS</div></section>
     <section id="work" class="work shell section-pad"><div class="section-head"><div><p class="eyebrow">SELECTED WORK / 001</p><h2>See the difference<br><em>for yourself.</em></h2></div><p>A real space, captured in Lahore and made explorable in your browser.</p></div>
-      <article class="project-card"><div class="project-visual"><img class="project-photo" src="${import.meta.env.BASE_URL}maikada-poster.jpg" alt="Interior of Maikada Cafe captured for a 3D walkthrough" loading="lazy" /><button id="open-tour" class="play-button" type="button" aria-label="Open Maikada 3D walkthrough"><span>↗</span></button><span class="project-badge">LIVE 3D CAPTURE</span></div><div class="project-info"><div><p class="eyebrow">VENUE EXPERIENCE · LAHORE</p><h3>Maikada Cafe</h3><p>Step inside a real venue through a browser-based 3D preview.</p><a href="./maikada.html" style="display:inline-block;margin-top:14px;color:#c9f27b">Read the project story ↗</a></div><button id="open-tour-text" class="project-link" type="button">Enter 3D space <span>↗</span></button></div></article>
+      <article class="project-card"><div class="project-visual"><img class="project-photo" src="${import.meta.env.BASE_URL}maikada-poster.jpg" alt="Interior of Maikada Cafe captured for a 3D walkthrough" loading="lazy" /><button id="open-tour" class="play-button" type="button" aria-label="Open Maikada 3D walkthrough"><span>↗</span></button><span class="project-badge">LIVE 3D CAPTURE</span></div><div class="project-info"><div><p class="eyebrow">VENUE EXPERIENCE · LAHORE</p><h3>Maikada Cafe</h3><p>Step inside a real venue through a browser-based 3D scene.</p><a href="./maikada.html" style="display:inline-block;margin-top:14px;color:#c9f27b">Read the project story ↗</a></div><button id="open-tour-text" class="project-link" type="button">Enter 3D space <span>↗</span></button></div></article>
       <p class="portfolio-note">More real spaces are coming. Every project featured here is captured or published with permission.</p>
     </section>
     <section class="community-gallery" aria-labelledby="community-title"><div class="shell"><div class="section-head"><div><p class="eyebrow">EXPLORE MORE SPACES</p><h2 id="community-title">See where 3D<br><em>can take you.</em></h2></div><p>From cafes and homes to museums and heritage sites, real spaces are ready to explore online.</p></div><p class="community-disclosure">These are independent creators' captures, shared under CC BY 4.0 and credited on each page. They show possibilities for interactive 3D; Maikada Cafe is Digital Twin's own featured capture.</p><div class="community-grid">${communityCards}</div></div></section>
@@ -40,7 +40,7 @@ app.innerHTML = `
     <section id="contact" class="cta-section"><div class="shell cta-inner"><p class="eyebrow">LET'S MAKE YOUR SPACE EXPLORABLE</p><h2>Show them the place.<br><em>Before the visit.</em></h2><p>Tell us what you want to capture. We’ll suggest a practical first project and quote.</p><a class="button button-dark" href="${whatsapp}" target="_blank" rel="noopener">Message us on WhatsApp <span>↗</span></a><span class="cta-phone">+92 309 9652168</span></div></section>
   </main>
   <footer class="footer shell"><a class="brand" href="#top"><span class="brand-mark"><i></i><i></i><i></i></span><span>DIGITAL<span class="brand-light">TWIN</span></span></a><span>Real places, ready to explore.</span><span>Lahore, Pakistan · © ${new Date().getFullYear()}</span></footer>
-  <div class="tour-modal" id="tour-modal" role="dialog" aria-modal="true" aria-label="Maikada Cafe 3D walkthrough" hidden><div class="tour-toolbar"><div><strong>Maikada Cafe</strong><span>3D walkthrough · Lahore</span></div><div class="tour-toolbar-actions"><span id="tour-status">Preparing scene…</span><button id="close-tour" type="button" aria-label="Close 3D walkthrough">×</button></div></div><div id="tour-canvas"></div><div class="tour-hint">Drag to look around · Scroll to zoom</div><div class="tour-loading" id="tour-loading"><div class="loading-ring"></div><strong>Opening the space</strong><span>The 3D scene is loading. This may take a moment on mobile data.</span></div></div>
+  <div class="tour-modal" id="tour-modal" role="dialog" aria-modal="true" aria-label="Maikada Cafe 3D walkthrough" hidden><div class="tour-toolbar"><div><strong>Maikada Cafe</strong><span>3D walkthrough · Lahore</span></div><div class="tour-toolbar-actions"><span id="tour-status">Preparing scene…</span><button id="close-tour" type="button" aria-label="Close 3D walkthrough">×</button></div></div><div id="tour-canvas"></div><div class="tour-hint">Drag to look around · Scroll or pinch to zoom</div><div class="tour-loading" id="tour-loading"><div class="loading-ring"></div><strong>Opening the space</strong><span>Loading the complete 3D capture. On mobile data, this may take a moment.</span></div></div>
 `;
 
 let viewer;
@@ -52,27 +52,53 @@ async function openTour() {
   if (viewer || loading) return;
   loading = true;
   try {
-    const GaussianSplats3D = await import('@mkkellogg/gaussian-splats-3d');
+    const [THREE, { OrbitControls }, { SparkRenderer, SplatMesh }] = await Promise.all([
+      import('three'),
+      import('three/addons/controls/OrbitControls.js'),
+      import('@sparkjsdev/spark')
+    ]);
     const target = document.querySelector('#tour-canvas');
-    viewer = new GaussianSplats3D.Viewer({
-      rootElement: target,
-      cameraUp: [0, 0, 1],
-      initialCameraPosition: [12, -14, 5],
-      initialCameraLookAt: [2, -1, -1],
-      sharedMemoryForWorkers: false,
-      gpuAcceleratedSort: false,
-      showLoadingUI: false,
-      dynamicScene: false
+    const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
+    renderer.setSize(target.clientWidth, target.clientHeight);
+    target.appendChild(renderer.domElement);
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color('#101517');
+    const camera = new THREE.PerspectiveCamera(70, target.clientWidth / target.clientHeight, 0.02, 200);
+    camera.position.set(0, -3.5, 2);
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.set(1, -3.5, 2);
+    controls.enableDamping = true;
+    controls.update();
+    scene.add(new SparkRenderer({ renderer }));
+    const mesh = new SplatMesh({
+      url: `${import.meta.env.BASE_URL}maikada-full-upright.spz`,
+      onProgress: event => {
+        if (event.lengthComputable) {
+          document.querySelector('#tour-status').textContent = `${Math.round(event.loaded / event.total * 100)}%`;
+        }
+      }
     });
-    await viewer.addSplatScene(`${import.meta.env.BASE_URL}maikada-preview.splat`, {
-      progressiveLoad: true,
-      showLoadingUI: false
+    scene.add(mesh);
+    renderer.setAnimationLoop(() => {
+      if (modal.hidden) return;
+      controls.update();
+      renderer.render(scene, camera);
     });
-    viewer.start();
+    const resize = () => {
+      camera.aspect = target.clientWidth / target.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(target.clientWidth, target.clientHeight);
+    };
+    window.addEventListener('resize', resize);
+    viewer = { renderer, scene, camera, controls, mesh, resize };
+    await mesh.initialized;
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     document.querySelector('#tour-loading').hidden = true;
-    document.querySelector('#tour-status').textContent = 'LIVE VIEW';
+    document.querySelector('#tour-status').textContent = 'LIVE 3D';
   } catch (error) {
     console.error(error);
+    viewer = undefined;
     document.querySelector('#tour-loading').innerHTML = '<strong>Could not open this scene</strong><span>Please try a modern browser with WebGL support, or contact us for a private demo.</span>';
     document.querySelector('#tour-status').textContent = 'UNAVAILABLE';
   } finally { loading = false; }
@@ -82,3 +108,4 @@ document.querySelector('#open-tour').addEventListener('click', openTour);
 document.querySelector('#open-tour-text').addEventListener('click', openTour);
 document.querySelector('#close-tour').addEventListener('click', closeTour);
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.hidden) closeTour(); });
+if (new URLSearchParams(location.search).get('tour') === 'maikada') openTour();
