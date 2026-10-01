@@ -46,6 +46,30 @@ app.innerHTML = `
 let viewer;
 let loading = false;
 const modal = document.querySelector('#tour-modal');
+function waitForVisibleScene(renderer, timeoutMs = 12000) {
+  const gl = renderer.getContext();
+  const pixel = new Uint8Array(4);
+  const deadline = performance.now() + timeoutMs;
+  return new Promise((resolve, reject) => {
+    const check = () => {
+      if (performance.now() > deadline) {
+        reject(new Error('The scan loaded but did not become visible.'));
+        return;
+      }
+      const canvas = renderer.domElement;
+      const samples = [[0.5, 0.5], [0.35, 0.5], [0.65, 0.5]];
+      for (const [x, y] of samples) {
+        gl.readPixels(Math.floor(canvas.width * x), Math.floor(canvas.height * y), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+        if (Math.abs(pixel[0] - 16) + Math.abs(pixel[1] - 21) + Math.abs(pixel[2] - 23) > 60) {
+          resolve();
+          return;
+        }
+      }
+      requestAnimationFrame(check);
+    };
+    requestAnimationFrame(check);
+  });
+}
 async function openTour() {
   modal.hidden = false;
   document.body.classList.add('modal-open');
@@ -95,7 +119,7 @@ async function openTour() {
     window.addEventListener('resize', resize);
     viewer = { renderer, scene, camera, controls, lower, resize };
     await lower.initialized;
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    await waitForVisibleScene(renderer);
     document.querySelector('#tour-progress-bar').style.width = '100%';
     document.querySelector('#tour-loading').hidden = true;
     document.querySelector('#tour-status').textContent = 'Loading lounge…';
