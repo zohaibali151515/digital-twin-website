@@ -83,7 +83,7 @@ async function openTour() {
     ]);
     const target = document.querySelector('#tour-canvas');
     const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
     renderer.setSize(target.clientWidth, target.clientHeight);
     target.appendChild(renderer.domElement);
     const scene = new THREE.Scene();
@@ -106,10 +106,27 @@ async function openTour() {
       }
     });
     scene.add(lower);
+    let qualityWindowStart = 0;
+    let qualityFrames = 0;
+    let qualityReady = false;
     renderer.setAnimationLoop(() => {
       if (modal.hidden) return;
       controls.update();
       renderer.render(scene, camera);
+      if (qualityReady && renderer.getPixelRatio() > 1.25) {
+        const now = performance.now();
+        if (!qualityWindowStart) qualityWindowStart = now;
+        qualityFrames++;
+        if (now - qualityWindowStart >= 5000) {
+          const fps = qualityFrames * 1000 / (now - qualityWindowStart);
+          if (fps < 35) {
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
+            renderer.setSize(target.clientWidth, target.clientHeight);
+          }
+          qualityWindowStart = now;
+          qualityFrames = 0;
+        }
+      }
     });
     const resize = () => {
       camera.aspect = target.clientWidth / target.clientHeight;
@@ -121,6 +138,7 @@ async function openTour() {
     viewer = { renderer, scene, camera, controls, lower, resize };
     await lower.initialized;
     await waitForVisibleScene(renderer);
+    qualityReady = true;
     document.querySelector('#tour-progress-bar').style.width = '100%';
     document.querySelector('#tour-loading').hidden = true;
     document.querySelector('#tour-status').textContent = 'Loading lounge…';
