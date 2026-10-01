@@ -3,7 +3,7 @@
 ## Observed assets and current implementation
 
 - Master file: `Maikada Cafe/AmarTest09-Cafe_2026-09-26-15-21-40.fjdslamp2_2.ply`, 653,624,780 bytes, 2,769,590 Gaussians, three spherical-harmonic bands. SHA-256: `8489c771cddc73332f3b7d3f44c6160f9505002d5b0c4ce69fa658f876534823`.
-- Current site: Vite, Three.js and Spark 2.2, hosted by GitHub Pages. The Maikada viewer downloads a 37.9 MB lower band, makes that café room interactive, then downloads a 19.1 MB upper band and enables the lounge shortcut. Both are SH3 SPZ v3. A 57.3 MB full-scene SPZ is retained temporarily as a comparison and cached-client fallback.
+- Current site: Vite, Three.js and Spark 2.2, hosted by GitHub Pages. The Maikada viewer downloads a 37.9 MB lower band, makes that café room interactive, then downloads a 19.1 MB upper band and enables the lounge shortcut. Both are SH3 SPZ v3. A 57.3 MB full-scene SPZ is retained locally as a comparison asset, outside the public build.
 - Existing converter randomly selects 900,000 splats and exports only base colour. It drops two thirds of the Gaussians and all view-dependent colour terms. `progressiveLoad: true` cannot recover detail absent from that asset.
 - The PLY is a Gaussian-splat representation. It has positions, opacity, scales, rotations and spherical-harmonic colour coefficients. It does **not** contain mesh triangles, UV textures, surface normals or PBR materials. Requirements to preserve those mesh attributes therefore do not apply to this source.
 
@@ -32,6 +32,8 @@ The Streamed SOG format is documented as a spatial tree of chunks and LODs. The 
 - A production-build mobile emulation with Fast 4G and 4x CPU slowdown reached the first loaded frame of the SH0 SOG in 8.3 seconds after forcing `renderer: 'webgl'`. This is a loading measurement only; visual quality failed. Before that fix, the default WebGPU startup took over a minute in the same emulation.
 - On 2026-10-01, the production Spark build rendered the complete SPZ in local desktop and Pixel 7-sized Chrome emulation in approximately 4–5 seconds. After publishing, the same tests reached a visible scene in about 13.4 seconds desktop and 10.7 seconds mobile-sized Chrome. Those measurements reflect those specific network conditions, not all mobile networks. The GitHub Pages asset returned HTTP 200 and `Content-Length: 57306183`. The user was asked to check the physical Pixel 7; FPS, RAM, GPU use, interaction smoothness and low/high-end Android and iPhone checks remain open.
 - On 2026-10-01, the progressive build in local production preview made the café room interactive in approximately 2.5–2.8 seconds on desktop and Pixel 7-sized Chrome emulation. Both bands were ready in approximately 4.5–4.9 seconds. Matched screenshots showed the first room complete with only the lower band and the lounge complete after both loaded. Loading the upper band alone removed lounge seating and floor details, so the viewer keeps the lower band resident. These times are local measurements; public and physical-phone checks remain necessary before claiming mobile performance.
+- A controlled Pixel 7-sized Chrome emulation with an 8 Mbps download cap, 150 ms latency and 4× CPU slowdown took 41.7 seconds to expose the first room and 61.2 seconds for both bands. Browser-frame sampling after loading measured about 57 frames/s idle and 53 frames/s during a drag; this is desktop-host emulation, not physical Pixel 7 GPU evidence. The first download remains too large for a few-second mobile-data target.
+- Spark 2.2's [RAD paged streaming](https://sparkjs.dev/docs/lod-getting-started/) was tested from the full-count SH3 SPZ using its quality LoD builder. The full RAD tree produced 58 chunk files plus an index, 87.8 MB total. In a local browser it fetched about 54–56 of those chunks within five seconds at the initial café camera. Under the same 8 Mbps/4× CPU throttle, the first view was black at 3 seconds, coarse at 8 seconds, visibly improving at 15 seconds, and close to the full-detail reference by 30–45 seconds. Lowering `lodSplatScale` from 1.0 to 0.5 still fetched about 54 chunks in five seconds. This particular scene did not show a useful total-bandwidth reduction, so RAD was not published in place of the staged SPZ viewer. The test artifacts remain local and ignored by Git.
 
 ## Asset architecture
 
@@ -41,7 +43,8 @@ assets/maikada/metadata.json       Master fingerprint and pipeline parameters
 assets/maikada/web/               Local generated working files; excluded from Git
 public/maikada-lower.spz           First interactive band
 public/maikada-upper.spz           Completes the lounge
-public/maikada-full-upright.spz    Temporary full-scene fallback for cached clients
+assets/maikada/web/*.rad[c]        Local RAD streaming experiment; excluded from Git
+assets/maikada/web/maikada-full-upright.spz  Local full-scene comparison asset
 GitHub Pages                       Frontend and pilot asset delivery
 R2 or another object store         Later, when many projects or traffic justify it
 ```

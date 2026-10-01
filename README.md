@@ -23,7 +23,7 @@ To recreate the progressive assets after `npm ci`:
 python scripts/build_maikada_tiles.py
 ```
 
-The script verifies the master, rotates the scene upright, and writes `maikada-lower.spz` and `maikada-upper.spz` under ignored `assets/maikada/web/`. Inspect each stage in a browser and compare important views with the master before copying both files to `public/`. Update the web fingerprints in the metadata record. Do not overwrite the PLY. `python scripts/build_maikada_spz.py` also builds a single full-scene reference for comparison.
+The script verifies the master, rotates the scene upright, and writes `maikada-lower.spz` and `maikada-upper.spz` under ignored `assets/maikada/web/`. Inspect each stage in a browser and compare important views with the master before copying both files to `public/`. Update the web fingerprints in the metadata record. Do not overwrite the PLY. `python scripts/build_maikada_spz.py` also builds a single full-scene reference for local comparison; it is not served by the website.
 
 The old 28.8 MB preview can be rebuilt with `python scripts/convert_ply.py`, but it randomly samples 900,000 Gaussians and drops view-dependent color. It is kept outside the public build as a failed quality experiment. The progressive bands contain 2,768,886 Gaussians in total and preserve three spherical-harmonic bands. The lower 37.9 MB file becomes interactive first; the upper 19.1 MB file completes the lounge. The two band files total 57.0 MB. The conversion omits 704 Gaussians compared with the full 2,769,590-splat reference, a 0.025% difference; visual comparison showed no meaningful difference in tested views. See [architecture and test evidence](docs/architecture.md).
 
