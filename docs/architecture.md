@@ -3,7 +3,7 @@
 ## Observed assets and current implementation
 
 - Master file: `Maikada Cafe/AmarTest09-Cafe_2026-09-26-15-21-40.fjdslamp2_2.ply`, 653,624,780 bytes, 2,769,590 Gaussians, three spherical-harmonic bands. SHA-256: `8489c771cddc73332f3b7d3f44c6160f9505002d5b0c4ce69fa658f876534823`.
-- Existing site: Vite, Three.js, `@mkkellogg/gaussian-splats-3d`, hosted by GitHub Pages. The viewer downloads one 28.8 MB `.splat` on demand.
+- Current site: Vite, Three.js and Spark 2.2, hosted by GitHub Pages. The Maikada viewer downloads one 57.3 MB full-count, SH3 SPZ v3 on demand.
 - Existing converter randomly selects 900,000 splats and exports only base colour. It drops two thirds of the Gaussians and all view-dependent colour terms. `progressiveLoad: true` cannot recover detail absent from that asset.
 - The PLY is a Gaussian-splat representation. It has positions, opacity, scales, rotations and spherical-harmonic colour coefficients. It does **not** contain mesh triangles, UV textures, surface normals or PBR materials. Requirements to preserve those mesh attributes therefore do not apply to this source.
 
@@ -11,7 +11,8 @@
 
 | Technology | 2.77M-splat PLY fit | Visual quality | Delivery/performance | Mobile | Effort | Decision |
 | --- | --- | --- | --- | --- | --- | --- |
-| Current Three.js GaussianSplats3D + `.splat` | Loads a converted scene | Weak with current random subset and SH0-only export | One 28.8 MB asset; no spatial LOD | One fixed budget | Low | Keep only as fallback until replacement is verified |
+| Old Three.js GaussianSplats3D + `.splat` | Loads a converted scene | Weak with random subset and SH0-only export | One 28.8 MB asset; no spatial LOD | One fixed budget | Low | Replaced in production |
+| Three.js + Spark 2.2 + SPZ v3 | Loads all source Gaussians and SH3 after conversion | Detailed interior in desktop and mobile-sized browser tests | One 57.3 MB download; no progressive spatial delivery yet | Browser emulation works; physical phones pending | Medium | Current production renderer |
 | PlayCanvas SuperSplat Viewer + Streamed SOG | Native Gaussian-splat path | Keeps all source Gaussians at top LOD and can retain SH bands, subject to SOG quantization | Spatial chunks, progressive LOD, device-aware Gaussian budget | Built-in touch/navigation and lower splat budget | Medium | Candidate; three-band output must pass visual and device testing |
 | Potree + octree point cloud | Requires converting Gaussians to points | Loses anisotropic shape, alpha compositing and view-dependent colour | Excellent for survey point-cloud inspection | Variable | Medium | Use for future LiDAR point-cloud products, not this photoreal tour |
 | GLB/glTF mesh + Draco/Meshopt | Source has no triangle mesh | Requires reconstruction; a naïve conversion loses the splat appearance | Excellent for meshes after proper meshing | Strong | High | Use only when a mesh is a separate deliverable |
@@ -21,15 +22,15 @@
 
 The Streamed SOG format is documented as a spatial tree of chunks and LODs. The [official format specification](https://developer.playcanvas.com/user-manual/gaussian-splatting/formats/streamed-sog/) and [generation guide](https://developer.playcanvas.com/user-manual/splat-transform/streamed-sog/) describe the file layout and conversion. The [SuperSplat performance guide](https://developer.playcanvas.com/user-manual/supersplat/streaming/) describes device-aware Gaussian budgets. Format support alone does not prove acceptable quality for this scan.
 
-## Current visual and performance evidence (2026-09-30)
+## Visual and performance evidence (2026-09-30 to 2026-10-01)
 
 - A 2.77M-splat, three-band rotated compressed PLY renders the Maikada interior clearly in SuperSplat Viewer at camera position `[0.8,-2.2,0.8]`, looking toward `[0.8,-2.2,3]`. This is a local quality reference, not a mobile delivery asset: it is 161.9 MB.
-- A three-LOD Streamed SOG made with `--filter-harmonics 0` occupies about 61 MB and retains all source positions at its top LOD. It **fails the visual gate** at the same camera: almost the entire interior is black. Re-exported LOD0 has matching position, scale, opacity, color DC and rotation statistics. Full-count compressed PLYs with zero, one or two SH bands also fail at this view; the three-band compressed PLY succeeds. Preserve all three bands for Maikada.
+- A three-LOD Streamed SOG made with `--filter-harmonics 0` occupies about 61 MB and retains all source positions at its top LOD. An earlier interior test showed a largely black view. Later camera tests found that the full-SH SOG can render matching exterior detail, so that black frame alone does not prove a conversion defect. Full-count compressed PLYs with zero, one or two SH bands failed at the earlier interior view; the three-band compressed PLY succeeded. Preserve all three bands for Maikada.
 - 20% adaptive, uniform and random subsets also fail at this interior view even when retaining all three SH bands. The visual reference requires the full Gaussian count. Lower-density LODs cannot be assumed to give a usable interior preview for this particular scan.
-- A 54.7 MB, three-band SPZ v3 was generated, but SuperSplat Viewer v1.36.2 reports `No parser found for resource` and the existing Three.js viewer rejects SPZ v3. It is not a working browser delivery format in this app.
-- A 126.5 MB, spatially chunked Streamed SOG containing all 2.77M Gaussians and all three SH bands also fails the same-camera visual comparison: almost the entire frame is black. It is kept as a local experiment and is not published. Full count and SH3 alone do not make this conversion visually equivalent to the reference PLY.
+- A 54.7 MiB, three-band SPZ v3 was rejected by SuperSplat Viewer v1.36.2 and the previous Three.js viewer. Spark 2.2 loaded and rendered that SPZ successfully, so the renderer was changed rather than degrading the scan.
+- A 126.5 MB, spatially chunked Streamed SOG containing all 2.77M Gaussians and all three SH bands eventually rendered a matched exterior view, but its local viewer took roughly 215 seconds to become ready. The earlier black interior comparison used a camera position outside the intended room, so it is not reliable evidence of visual failure. This variant is kept as a local experiment because its measured loading time is unsuitable for the website.
 - A production-build mobile emulation with Fast 4G and 4x CPU slowdown reached the first loaded frame of the SH0 SOG in 8.3 seconds after forcing `renderer: 'webgl'`. This is a loading measurement only; visual quality failed. Before that fix, the default WebGPU startup took over a minute in the same emulation.
-- The user can test on a Google Pixel 7 after a working candidate is published. Physical device, FPS, memory and interaction measurements remain outstanding. No claim of mobile readiness is supported yet.
+- On 2026-10-01, the production Spark build rendered the complete SPZ in local desktop and Pixel 7-sized Chrome emulation in approximately 4–5 seconds. After publishing, the same tests reached a visible scene in about 13.4 seconds desktop and 10.7 seconds mobile-sized Chrome. Those measurements reflect those specific network conditions, not all mobile networks. The GitHub Pages asset returned HTTP 200 and `Content-Length: 57306183`. The user was asked to check the physical Pixel 7; FPS, RAM, GPU use, interaction smoothness and low/high-end Android and iPhone checks remain open.
 
 ## Asset architecture
 
@@ -37,7 +38,7 @@ The Streamed SOG format is documented as a spatial tree of chunks and LODs. The 
 Maikada Cafe/*.ply                 Local immutable master; excluded from Git
 assets/maikada/metadata.json       Master fingerprint and pipeline parameters
 assets/maikada/web/               Local generated working files; excluded from Git
-public/assets/maikada/            Published web assets during the GitHub Pages pilot
+public/maikada-full-upright.spz    Published web asset during the GitHub Pages pilot
 GitHub Pages                       Frontend and pilot asset delivery
 R2 or another object store         Later, when many projects or traffic justify it
 ```
@@ -56,12 +57,12 @@ GitHub Pages is acceptable for a single pilot scene; it has a [soft 100 GB/month
 
 Network speed still depends on chunk sizes, CDN cache hits and the visitor's location. Benchmark a deployed asset from Pakistan before assuming one provider is faster. Use versioned asset paths so browsers never mix metadata and chunks from different conversions.
 
-## Quality gates before production switch
+## Remaining quality gates
 
-1. Generate a full-detail SOG or Streamed SOG from the original PLY without overwriting it. Preserve all three SH bands unless a measured comparison supports a lower setting.
-2. Compare the original scan and web output at the same camera views: architectural edges, fine objects, colour, transparency and floaters.
+1. Repeat the SPZ conversion using `scripts/build_maikada_spz.py` and compare important interior views with the original scan. The original PLY checksum is verified before conversion.
+2. Implement a high-quality early view and spatial/progressive delivery without cutting away visible rooms. A 651,091-splat room crop loaded quickly but visibly removed the right half of the room and the exterior, so it was rejected.
 3. Measure first usable frame, transferred bytes, memory where available, frame rate and responsiveness on desktop and physical low/mid/high Android and iPhone devices. Browser emulation is a development check, not a substitute for those devices.
-4. Keep the current live viewer unchanged until the new viewer and asset paths pass desktop/mobile checks.
+4. Validate tour navigation across the rooms and a stable Pixel 7 experience before calling the digital twin complete.
 
 ## Public demo licensing gate
 

@@ -40,7 +40,7 @@ app.innerHTML = `
     <section id="contact" class="cta-section"><div class="shell cta-inner"><p class="eyebrow">LET'S MAKE YOUR SPACE EXPLORABLE</p><h2>Show them the place.<br><em>Before the visit.</em></h2><p>Tell us what you want to capture. We’ll suggest a practical first project and quote.</p><a class="button button-dark" href="${whatsapp}" target="_blank" rel="noopener">Message us on WhatsApp <span>↗</span></a><span class="cta-phone">+92 309 9652168</span></div></section>
   </main>
   <footer class="footer shell"><a class="brand" href="#top"><span class="brand-mark"><i></i><i></i><i></i></span><span>DIGITAL<span class="brand-light">TWIN</span></span></a><span>Real places, ready to explore.</span><span>Lahore, Pakistan · © ${new Date().getFullYear()}</span></footer>
-  <div class="tour-modal" id="tour-modal" role="dialog" aria-modal="true" aria-label="Maikada Cafe 3D walkthrough" hidden><div class="tour-toolbar"><div><strong>Maikada Cafe</strong><span>3D walkthrough · Lahore</span></div><div class="tour-toolbar-actions"><span id="tour-status">Preparing scene…</span><button id="close-tour" type="button" aria-label="Close 3D walkthrough">×</button></div></div><div id="tour-canvas"></div><div class="tour-hint">Drag to look around · Scroll or pinch to zoom</div><div class="tour-loading" id="tour-loading"><div class="loading-ring"></div><strong>Opening the space</strong><span>Loading the complete 3D capture. On mobile data, this may take a moment.</span></div></div>
+  <div class="tour-modal" id="tour-modal" role="dialog" aria-modal="true" aria-label="Maikada Cafe 3D walkthrough" hidden><div class="tour-toolbar"><div><strong>Maikada Cafe</strong><span>3D walkthrough · Lahore</span></div><div class="tour-toolbar-actions"><span id="tour-status">Preparing scene…</span><button id="close-tour" type="button" aria-label="Close 3D walkthrough">×</button></div></div><div id="tour-canvas"></div><div class="tour-hint">Drag to look around · Scroll or pinch to zoom · Two fingers to pan</div><div class="tour-controls"><button id="tour-reset" type="button" aria-label="Reset view">Reset view</button><button id="tour-fullscreen" type="button" aria-label="Toggle fullscreen">Fullscreen</button></div><div class="tour-loading" id="tour-loading"><div class="loading-ring"></div><strong>Opening the space</strong><span>Loading the complete 3D capture. On mobile data, this may take a moment.</span></div></div>
 `;
 
 let viewer;
@@ -103,9 +103,31 @@ async function openTour() {
     document.querySelector('#tour-status').textContent = 'UNAVAILABLE';
   } finally { loading = false; }
 }
-function closeTour() { modal.hidden = true; document.body.classList.remove('modal-open'); }
+function closeTour() {
+  if (document.fullscreenElement === modal) document.exitFullscreen().catch(() => {});
+  modal.hidden = true;
+  document.body.classList.remove('modal-open');
+}
 document.querySelector('#open-tour').addEventListener('click', openTour);
 document.querySelector('#open-tour-text').addEventListener('click', openTour);
 document.querySelector('#close-tour').addEventListener('click', closeTour);
+document.querySelector('#tour-reset').addEventListener('click', () => {
+  if (!viewer) return;
+  viewer.camera.position.set(0, -3.5, 2);
+  viewer.controls.target.set(1, -3.5, 2);
+  viewer.controls.update();
+});
+const fullscreenButton = document.querySelector('#tour-fullscreen');
+fullscreenButton.hidden = !document.fullscreenEnabled;
+fullscreenButton.addEventListener('click', async () => {
+  try {
+    if (document.fullscreenElement === modal) await document.exitFullscreen();
+    else await modal.requestFullscreen();
+  } catch (error) { console.warn('Fullscreen unavailable:', error); }
+});
+document.addEventListener('fullscreenchange', () => {
+  fullscreenButton.textContent = document.fullscreenElement === modal ? 'Exit fullscreen' : 'Fullscreen';
+  viewer?.resize();
+});
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.hidden) closeTour(); });
 if (new URLSearchParams(location.search).get('tour') === 'maikada') openTour();
