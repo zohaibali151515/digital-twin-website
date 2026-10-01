@@ -40,7 +40,7 @@ app.innerHTML = `
     <section id="contact" class="cta-section"><div class="shell cta-inner"><p class="eyebrow">LET'S MAKE YOUR SPACE EXPLORABLE</p><h2>Show them the place.<br><em>Before the visit.</em></h2><p>Tell us what you want to capture. We’ll suggest a practical first project and quote.</p><a class="button button-dark" href="${whatsapp}" target="_blank" rel="noopener">Message us on WhatsApp <span>↗</span></a><span class="cta-phone">+92 309 9652168</span></div></section>
   </main>
   <footer class="footer shell"><a class="brand" href="#top"><span class="brand-mark"><i></i><i></i><i></i></span><span>DIGITAL<span class="brand-light">TWIN</span></span></a><span>Real places, ready to explore.</span><span>Lahore, Pakistan · © ${new Date().getFullYear()}</span></footer>
-  <div class="tour-modal" id="tour-modal" role="dialog" aria-modal="true" aria-label="Maikada Cafe 3D walkthrough" hidden><div class="tour-toolbar"><div><strong>Maikada Cafe</strong><span>3D walkthrough · Lahore</span></div><div class="tour-toolbar-actions"><span id="tour-status">Preparing scene…</span><button id="close-tour" type="button" aria-label="Close 3D walkthrough">×</button></div></div><div id="tour-canvas"></div><div class="tour-hint">Drag to look around · Scroll or pinch to zoom · Two fingers to pan</div><div class="tour-controls"><button id="tour-reset" type="button" aria-label="Reset view">Reset view</button><button id="tour-fullscreen" type="button" aria-label="Toggle fullscreen">Fullscreen</button></div><div class="tour-loading" id="tour-loading"><div class="loading-ring"></div><strong>Opening the space</strong><span>Loading the complete 3D capture. On mobile data, this may take a moment.</span></div></div>
+  <div class="tour-modal" id="tour-modal" role="dialog" aria-modal="true" aria-label="Maikada Cafe 3D walkthrough" hidden><div class="tour-toolbar"><div><strong>Maikada Cafe</strong><span>3D walkthrough · Lahore</span></div><div class="tour-toolbar-actions"><span id="tour-status">Preparing scene…</span><button id="close-tour" type="button" aria-label="Close 3D walkthrough">×</button></div></div><div id="tour-canvas"></div><div class="tour-rooms" aria-label="Explore rooms"><button id="tour-brick" type="button" aria-pressed="true">Café room</button><button id="tour-lounge" type="button" aria-pressed="false" disabled title="Loading lounge">Lounge</button></div><div class="tour-hint">Drag to look around · Scroll or pinch to zoom · Two fingers to pan</div><div class="tour-controls"><button id="tour-reset" type="button" aria-label="Reset view">Reset view</button><button id="tour-fullscreen" type="button" aria-label="Toggle fullscreen">Fullscreen</button></div><div class="tour-loading" id="tour-loading"><div class="loading-ring"></div><strong>Opening the café room</strong><span>The lounge will load after you can explore the first room.</span></div></div>
 `;
 
 let viewer;
@@ -71,15 +71,15 @@ async function openTour() {
     controls.enableDamping = true;
     controls.update();
     scene.add(new SparkRenderer({ renderer }));
-    const mesh = new SplatMesh({
-      url: `${import.meta.env.BASE_URL}maikada-full-upright.spz`,
+    const lower = new SplatMesh({
+      url: `${import.meta.env.BASE_URL}maikada-lower.spz`,
       onProgress: event => {
         if (event.lengthComputable) {
-          document.querySelector('#tour-status').textContent = `${Math.round(event.loaded / event.total * 100)}%`;
+          document.querySelector('#tour-status').textContent = `Café room ${Math.round(event.loaded / event.total * 100)}%`;
         }
       }
     });
-    scene.add(mesh);
+    scene.add(lower);
     renderer.setAnimationLoop(() => {
       if (modal.hidden) return;
       controls.update();
@@ -91,11 +91,25 @@ async function openTour() {
       renderer.setSize(target.clientWidth, target.clientHeight);
     };
     window.addEventListener('resize', resize);
-    viewer = { renderer, scene, camera, controls, mesh, resize };
-    await mesh.initialized;
+    viewer = { renderer, scene, camera, controls, lower, resize };
+    await lower.initialized;
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     document.querySelector('#tour-loading').hidden = true;
-    document.querySelector('#tour-status').textContent = 'LIVE 3D';
+    document.querySelector('#tour-status').textContent = 'Loading lounge…';
+    const upper = new SplatMesh({ url: `${import.meta.env.BASE_URL}maikada-upper.spz` });
+    viewer.upper = upper;
+    scene.add(upper);
+    try {
+      await upper.initialized;
+      document.querySelector('#tour-lounge').disabled = false;
+      document.querySelector('#tour-lounge').title = 'Explore the lounge';
+      document.querySelector('#tour-status').textContent = 'LIVE 3D';
+    } catch (error) {
+      console.error('Could not load lounge:', error);
+      scene.remove(upper);
+      document.querySelector('#tour-status').textContent = 'Café room ready';
+      document.querySelector('#tour-lounge').title = 'Lounge unavailable';
+    }
   } catch (error) {
     console.error(error);
     viewer = undefined;
@@ -111,11 +125,19 @@ function closeTour() {
 document.querySelector('#open-tour').addEventListener('click', openTour);
 document.querySelector('#open-tour-text').addEventListener('click', openTour);
 document.querySelector('#close-tour').addEventListener('click', closeTour);
+const roomButtons = [document.querySelector('#tour-brick'), document.querySelector('#tour-lounge')];
+function goToRoom(position, target, activeButton) {
+  if (!viewer) return;
+  viewer.camera.position.set(...position);
+  viewer.controls.target.set(...target);
+  viewer.controls.update();
+  roomButtons.forEach(button => button.setAttribute('aria-pressed', String(button === activeButton)));
+}
+roomButtons[0].addEventListener('click', () => goToRoom([0, -3.5, 2], [1, -3.5, 2], roomButtons[0]));
+roomButtons[1].addEventListener('click', () => goToRoom([1, 0, 2], [2, 0, 2], roomButtons[1]));
 document.querySelector('#tour-reset').addEventListener('click', () => {
   if (!viewer) return;
-  viewer.camera.position.set(0, -3.5, 2);
-  viewer.controls.target.set(1, -3.5, 2);
-  viewer.controls.update();
+  goToRoom([0, -3.5, 2], [1, -3.5, 2], roomButtons[0]);
 });
 const fullscreenButton = document.querySelector('#tour-fullscreen');
 fullscreenButton.hidden = !document.fullscreenEnabled;

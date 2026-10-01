@@ -3,7 +3,7 @@
 ## Observed assets and current implementation
 
 - Master file: `Maikada Cafe/AmarTest09-Cafe_2026-09-26-15-21-40.fjdslamp2_2.ply`, 653,624,780 bytes, 2,769,590 Gaussians, three spherical-harmonic bands. SHA-256: `8489c771cddc73332f3b7d3f44c6160f9505002d5b0c4ce69fa658f876534823`.
-- Current site: Vite, Three.js and Spark 2.2, hosted by GitHub Pages. The Maikada viewer downloads one 57.3 MB full-count, SH3 SPZ v3 on demand.
+- Current site: Vite, Three.js and Spark 2.2, hosted by GitHub Pages. The Maikada viewer downloads a 37.9 MB lower band, makes that café room interactive, then downloads a 19.1 MB upper band and enables the lounge shortcut. Both are SH3 SPZ v3. A 57.3 MB full-scene SPZ is retained temporarily as a comparison and cached-client fallback.
 - Existing converter randomly selects 900,000 splats and exports only base colour. It drops two thirds of the Gaussians and all view-dependent colour terms. `progressiveLoad: true` cannot recover detail absent from that asset.
 - The PLY is a Gaussian-splat representation. It has positions, opacity, scales, rotations and spherical-harmonic colour coefficients. It does **not** contain mesh triangles, UV textures, surface normals or PBR materials. Requirements to preserve those mesh attributes therefore do not apply to this source.
 
@@ -12,7 +12,7 @@
 | Technology | 2.77M-splat PLY fit | Visual quality | Delivery/performance | Mobile | Effort | Decision |
 | --- | --- | --- | --- | --- | --- | --- |
 | Old Three.js GaussianSplats3D + `.splat` | Loads a converted scene | Weak with random subset and SH0-only export | One 28.8 MB asset; no spatial LOD | One fixed budget | Low | Replaced in production |
-| Three.js + Spark 2.2 + SPZ v3 | Loads all source Gaussians and SH3 after conversion | Detailed interior in desktop and mobile-sized browser tests | One 57.3 MB download; no progressive spatial delivery yet | Browser emulation works; physical phones pending | Medium | Current production renderer |
+| Three.js + Spark 2.2 + SPZ v3 | Loads 2,768,886 Gaussians across two bands with SH3 after conversion | Detailed interior in desktop and mobile-sized browser tests | First room loads from 37.9 MB; second 19.1 MB band follows | Browser emulation works; physical phones pending | Medium | Current production renderer |
 | PlayCanvas SuperSplat Viewer + Streamed SOG | Native Gaussian-splat path | Keeps all source Gaussians at top LOD and can retain SH bands, subject to SOG quantization | Spatial chunks, progressive LOD, device-aware Gaussian budget | Built-in touch/navigation and lower splat budget | Medium | Candidate; three-band output must pass visual and device testing |
 | Potree + octree point cloud | Requires converting Gaussians to points | Loses anisotropic shape, alpha compositing and view-dependent colour | Excellent for survey point-cloud inspection | Variable | Medium | Use for future LiDAR point-cloud products, not this photoreal tour |
 | GLB/glTF mesh + Draco/Meshopt | Source has no triangle mesh | Requires reconstruction; a naïve conversion loses the splat appearance | Excellent for meshes after proper meshing | Strong | High | Use only when a mesh is a separate deliverable |
@@ -31,6 +31,7 @@ The Streamed SOG format is documented as a spatial tree of chunks and LODs. The 
 - A 126.5 MB, spatially chunked Streamed SOG containing all 2.77M Gaussians and all three SH bands eventually rendered a matched exterior view, but its local viewer took roughly 215 seconds to become ready. The earlier black interior comparison used a camera position outside the intended room, so it is not reliable evidence of visual failure. This variant is kept as a local experiment because its measured loading time is unsuitable for the website.
 - A production-build mobile emulation with Fast 4G and 4x CPU slowdown reached the first loaded frame of the SH0 SOG in 8.3 seconds after forcing `renderer: 'webgl'`. This is a loading measurement only; visual quality failed. Before that fix, the default WebGPU startup took over a minute in the same emulation.
 - On 2026-10-01, the production Spark build rendered the complete SPZ in local desktop and Pixel 7-sized Chrome emulation in approximately 4–5 seconds. After publishing, the same tests reached a visible scene in about 13.4 seconds desktop and 10.7 seconds mobile-sized Chrome. Those measurements reflect those specific network conditions, not all mobile networks. The GitHub Pages asset returned HTTP 200 and `Content-Length: 57306183`. The user was asked to check the physical Pixel 7; FPS, RAM, GPU use, interaction smoothness and low/high-end Android and iPhone checks remain open.
+- On 2026-10-01, the progressive build in local production preview made the café room interactive in approximately 2.5–2.8 seconds on desktop and Pixel 7-sized Chrome emulation. Both bands were ready in approximately 4.5–4.9 seconds. Matched screenshots showed the first room complete with only the lower band and the lounge complete after both loaded. Loading the upper band alone removed lounge seating and floor details, so the viewer keeps the lower band resident. These times are local measurements; public and physical-phone checks remain necessary before claiming mobile performance.
 
 ## Asset architecture
 
@@ -38,7 +39,9 @@ The Streamed SOG format is documented as a spatial tree of chunks and LODs. The 
 Maikada Cafe/*.ply                 Local immutable master; excluded from Git
 assets/maikada/metadata.json       Master fingerprint and pipeline parameters
 assets/maikada/web/               Local generated working files; excluded from Git
-public/maikada-full-upright.spz    Published web asset during the GitHub Pages pilot
+public/maikada-lower.spz           First interactive band
+public/maikada-upper.spz           Completes the lounge
+public/maikada-full-upright.spz    Temporary full-scene fallback for cached clients
 GitHub Pages                       Frontend and pilot asset delivery
 R2 or another object store         Later, when many projects or traffic justify it
 ```
@@ -60,7 +63,7 @@ Network speed still depends on chunk sizes, CDN cache hits and the visitor's loc
 ## Remaining quality gates
 
 1. Repeat the SPZ conversion using `scripts/build_maikada_spz.py` and compare important interior views with the original scan. The original PLY checksum is verified before conversion.
-2. Implement a high-quality early view and spatial/progressive delivery without cutting away visible rooms. A 651,091-splat room crop loaded quickly but visibly removed the right half of the room and the exterior, so it was rejected.
+2. Improve first-room download beyond the current 37.9 MB while preserving the complete view. A 651,091-splat room crop loaded quickly but visibly removed the right half of the room and the exterior, so it was rejected. The two-band split preserves the tested rooms and loads them sequentially.
 3. Measure first usable frame, transferred bytes, memory where available, frame rate and responsiveness on desktop and physical low/mid/high Android and iPhone devices. Browser emulation is a development check, not a substitute for those devices.
 4. Validate tour navigation across the rooms and a stable Pixel 7 experience before calling the digital twin complete.
 

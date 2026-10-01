@@ -11,12 +11,13 @@
   },
   "web": {
     "status": "published",
-    "strategy": "Full-count SH3 SPZ v3 rendered with Spark 2.2",
-    "path": "../../public/maikada-full-upright.spz",
-    "bytes": 57306183,
-    "sha256": "67b2fa462e9bd44968324aa82674596b28aaa882c73f088ac7e691bb250aaad3",
-    "gaussians": 2769590,
+    "strategy": "Two progressive full-detail SH3 SPZ v3 bands rendered with Spark 2.2",
+    "tiles": [
+      {"path": "../../public/maikada-lower.spz", "bytes": 37897373, "sha256": "9453f73ab6832e6503b409e66881f651d45e17d32ab2a55e3a5e63b8e5ad5632", "gaussians": 1821056},
+      {"path": "../../public/maikada-upper.spz", "bytes": 19110478, "sha256": "e74ffaa8614d825edc8d77737ab21f2315a0de8fc538d1568251da3b2e50ea9c", "gaussians": 947830}
+    ],
+    "fullReference": {"path": "../../public/maikada-full-upright.spz", "bytes": 57306183, "sha256": "67b2fa462e9bd44968324aa82674596b28aaa882c73f088ac7e691bb250aaad3", "gaussians": 2769590},
     "sphericalHarmonicBands": 3,
-    "limitation": "Single 57 MB download; progressive spatial delivery and physical phone validation remain open"
+    "limitation": "The lower 38 MB band must still download before interaction; physical phone validation remains open"
   }
 }

@@ -11,21 +11,21 @@ npm run build
 npm run preview
 ```
 
-Vite builds the home page, Maikada case study and community demo detail page. The Maikada viewer opens a full-count SH3 SPZ v3 in Spark 2.2 on demand. Independent demos are embedded from SuperSplat with creator and license credit; see [community demo rights](docs/community-demos.md).
+Vite builds the home page, Maikada case study and community demo detail page. The Maikada viewer uses Spark 2.2. It opens the lower SPZ band first, then loads the upper band and enables the lounge shortcut. Both retain all three spherical-harmonic bands. Independent demos are embedded from SuperSplat with creator and license credit; see [community demo rights](docs/community-demos.md).
 
 ## Maikada master and web asset
 
 The immutable master is `Maikada Cafe/AmarTest09-Cafe_2026-09-26-15-21-40.fjdslamp2_2.ply`. It is excluded from Git. `assets/maikada/metadata.json` records its byte count and SHA-256. Keep another backup outside this computer, ideally in private versioned storage. GitHub Pages serves the derived web asset, not the master.
 
-To recreate the published format after `npm ci`:
+To recreate the progressive assets after `npm ci`:
 
 ```bash
-python scripts/build_maikada_spz.py
+python scripts/build_maikada_tiles.py
 ```
 
-The script verifies the master, rotates the scene upright, and writes `assets/maikada/web/maikada-full-upright-rebuilt.spz`. The output directory is ignored by Git. Inspect the scene in a browser, compare important views with the master, and only then copy it to `public/maikada-full-upright.spz`. Update the web fingerprint in the metadata record. Do not overwrite the PLY.
+The script verifies the master, rotates the scene upright, and writes `maikada-lower.spz` and `maikada-upper.spz` under ignored `assets/maikada/web/`. Inspect each stage in a browser and compare important views with the master before copying both files to `public/`. Update the web fingerprints in the metadata record. Do not overwrite the PLY. `python scripts/build_maikada_spz.py` also builds a single full-scene reference for comparison.
 
-The old 28.8 MB preview can be rebuilt with `python scripts/convert_ply.py`, but it randomly samples 900,000 Gaussians and drops view-dependent color. It is kept outside the public build as a failed quality experiment. The published SPZ retains all 2,769,590 Gaussians and three spherical-harmonic bands. It is 57.3 MB and currently downloads as one file. Progressive spatial delivery remains open; see [architecture and test evidence](docs/architecture.md).
+The old 28.8 MB preview can be rebuilt with `python scripts/convert_ply.py`, but it randomly samples 900,000 Gaussians and drops view-dependent color. It is kept outside the public build as a failed quality experiment. The progressive bands contain 2,768,886 Gaussians in total and preserve three spherical-harmonic bands. The lower 37.9 MB file becomes interactive first; the upper 19.1 MB file completes the lounge. The two band files total 57.0 MB. The conversion omits 704 Gaussians compared with the full 2,769,590-splat reference, a 0.025% difference; visual comparison showed no meaningful difference in tested views. See [architecture and test evidence](docs/architecture.md).
 
 ## Add a project
 
