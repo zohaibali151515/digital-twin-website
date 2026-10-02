@@ -3,6 +3,7 @@ import './community.css';
 import { communityDemos } from './community-data.js';
 import { createTourNavigation } from './tour-navigation.js';
 import { createTourPanorama } from './tour-panorama.js';
+import { createTourDiagnostics } from './tour-diagnostics.js';
 
 const phone = '923099652168';
 const message = encodeURIComponent('Hello Digital Twin, I would like a 3D walkthrough for my space.');
@@ -53,6 +54,7 @@ async function openTour() {
   document.body.classList.add('modal-open');
   if (viewer || loading) return;
   loading = true;
+  const diagnostics = createTourDiagnostics(modal);
   try {
     const [THREE, { OrbitControls }] = await Promise.all([
       import('three'),
@@ -87,6 +89,7 @@ async function openTour() {
     controls.enableZoom = false;
     controls.enablePan = false;
     if (panoramaActive) {
+      diagnostics.mark('preview');
       document.querySelector('#tour-loading').hidden = true;
       document.querySelector('#tour-status').textContent = '360 preview · loading 3D';
       document.querySelector('.tour-hint').textContent = '360 preview · Drag to look around while the 3D walkthrough loads';
@@ -100,6 +103,7 @@ async function openTour() {
       if (!panoramaActive) return;
       panoramaActive = false;
       panorama.dispose();
+      diagnostics.mark('threeD');
       qualityReady = true;
       if (!roomReady) {
         controls.minAzimuthAngle = -Math.PI / 2 - 0.17;
@@ -112,6 +116,7 @@ async function openTour() {
     };
     renderer.setAnimationLoop(() => {
       if (modal.hidden) return;
+      diagnostics.frame();
       navigation.update();
       if (panoramaActive) {
         camera.getWorldDirection(viewDirection);
@@ -177,6 +182,7 @@ async function openTour() {
     if (!panoramaActive) {
       document.querySelector('#tour-loading').hidden = true;
       qualityReady = true;
+      diagnostics.mark('threeD');
     }
     document.querySelector('#tour-status').textContent = panoramaActive ? 'Finishing 3D room…' : 'Completing room…';
     const remainder = new SplatMesh({ url: `${import.meta.env.BASE_URL}maikada-remainder.spz` });
@@ -186,6 +192,7 @@ async function openTour() {
     await new Promise(resolve => setTimeout(resolve, 1500));
     roomReady = true;
     show3D();
+    diagnostics.mark('room');
     controls.minAzimuthAngle = -Infinity;
     controls.maxAzimuthAngle = Infinity;
     controls.minPolarAngle = 0;
@@ -201,6 +208,7 @@ async function openTour() {
     scene.add(upper);
     try {
       await upper.initialized;
+      diagnostics.mark('lounge');
       document.querySelector('#tour-lounge').disabled = false;
       document.querySelector('#tour-lounge').title = 'Explore the lounge';
       document.querySelector('#tour-status').textContent = 'LIVE 3D';

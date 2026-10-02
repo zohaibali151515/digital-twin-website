@@ -31,6 +31,8 @@ To regenerate the six panorama faces from the current full-detail web assets, st
 
 In the live viewer, Orbit uses drag, right drag and wheel or pinch. Explore uses drag to look and WASD or arrow keys to move within the selected room. Fly uses the same look controls but moves freely in the viewed direction; Q/E move down/up and Shift increases speed. On phones, Fly has movement arrows and Up/Down buttons. Reset returns to the café entrance if a camera moves outside the captured area.
 
+For a physical-phone performance check, open `https://zohaibali151515.github.io/digital-twin-website/?tour=maikada&diagnostics=1`. This opt-in panel shows elapsed time to the 360 preview, first 3D view, full café room and lounge, plus recent browser frame cadence and Chromium's JavaScript heap estimate when available. It does not send telemetry to a server. Frame cadence is not GPU render time, and JavaScript heap does not include GPU textures or all tab memory. Use a fresh browser tab and note whether the phone is on mobile data or Wi-Fi; cached repeat visits are not comparable to first visits. The ordinary tour URL omits the panel.
+
 `public/maikada-poster.jpg` is a clean frame captured from the current full-detail browser viewer. Replace it after a new scan or a major viewer change so the preview reflects the real interactive result. Portrait screens use a wider camera field of view to show more of each room.
 
 ## Add a project
