@@ -6,6 +6,7 @@
 - Current site: Vite, Three.js and Spark 2.2, hosted by GitHub Pages. The Maikada viewer downloads a 7.1 MB camera-first core, adds a 13.5 MB first-room complement to unlock navigation, then refines the room with 17.0 MB of detail and downloads the 19.1 MB upper band. All four are SH3 SPZ v3. A 57.3 MB full-scene SPZ is retained locally as a comparison asset, outside the public build.
 - Existing converter randomly selects 900,000 splats and exports only base colour. It drops two thirds of the Gaussians and all view-dependent colour terms. `progressiveLoad: true` cannot recover detail absent from that asset.
 - The PLY is a Gaussian-splat representation. It has positions, opacity, scales, rotations and spherical-harmonic colour coefficients. It does **not** contain mesh triangles, UV textures, surface normals or PBR materials. Requirements to preserve those mesh attributes therefore do not apply to this source.
+- The other Maikada media currently in the workspace is `MaikadaCafe.mp4`, a 1920 × 1080, 29.97 fps screen recording of the scan in SuperSplat. It is useful as a visual reference but cannot add colour detail that is absent from the PLY. The home hero is therefore rendered from the verified full-detail web scene. Original X5 photos or 360 video would be needed to assess a sharper photographic preview at fixed viewpoints.
 
 ## Technology comparison for this file
 

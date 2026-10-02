@@ -11,6 +11,19 @@
 .tour-controls{z-index:3;flex-wrap:wrap;justify-content:flex-end;max-width:min(70vw,560px)}
 .tour-controls button[aria-pressed="true"]{background:#c9f27b;border-color:#c9f27b;color:#101517;font-weight:700}
 .tour-controls button:disabled{opacity:.5;cursor:wait}
+
+/* The first screen shows the actual Maikada capture. */
+.hero-art{background:#19211e}
+.hero-art:after{background:linear-gradient(0deg,#0b1111c9,transparent 45%);mix-blend-mode:normal;pointer-events:none}
+.hero-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.hero-art-label{top:30px;bottom:auto;left:30px;gap:12px;align-items:center;background:#101817df;border:1px solid #ffffff38;padding:10px 12px;font-size:10px}
+.hero-art-label strong{font-size:10px;letter-spacing:.12em}
+.hero-entry{position:absolute;z-index:2;left:30px;right:30px;bottom:30px;display:flex;align-items:center;justify-content:space-between;border:1px solid #d0f895;background:#c9f27b;color:#101714;padding:18px 20px;font-size:14px;font-weight:700;text-align:left}
+.hero-entry:hover,.hero-entry:focus-visible{background:#e0ffa7}
+.hero-entry span{font-size:20px;font-weight:400}
+.hero-actions .button{border:0;text-align:left}
+@media(max-width:850px){.hero-art{min-height:390px}.hero-art-label{top:18px;left:18px}.hero-entry{left:18px;right:18px;bottom:18px}}
+@media(max-width:520px){.hero-copy{min-height:0;padding:42px 0 26px}.hero-copy .eyebrow{margin-bottom:22px}.hero h1{font-size:46px}.hero-lede{font-size:16px;line-height:1.55;margin:20px 0 24px}.hero-actions{gap:14px}.hero-foot{padding-top:30px}.hero-art{min-height:390px}}
 .tour-help{position:absolute;z-index:4;right:24px;bottom:72px;width:min(360px,calc(100vw - 24px));padding:18px 20px;background:#111817f2;color:#f4f1e9;border:1px solid #819188;box-shadow:0 12px 40px #0009;font-size:13px;line-height:1.5}
 .tour-help[hidden]{display:none}
 .tour-help strong{font:600 18px 'Space Grotesk',sans-serif}

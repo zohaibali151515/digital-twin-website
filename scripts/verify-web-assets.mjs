@@ -8,7 +8,7 @@ const metadataDir = resolve(root, 'assets/maikada');
 const metadata = JSON.parse(readFileSync(resolve(metadataDir, 'metadata.json'), 'utf8'));
 const publicDir = resolve(root, 'public') + sep;
 
-for (const asset of [...metadata.web.tiles, ...metadata.web.panorama, ...(metadata.web.loungePanorama || [])]) {
+for (const asset of [...metadata.web.tiles, ...metadata.web.panorama, ...(metadata.web.loungePanorama || []), ...(metadata.web.heroImage ? [metadata.web.heroImage] : [])]) {
   const file = resolve(metadataDir, asset.path);
   if (!file.startsWith(publicDir)) throw new Error(`Web asset outside public/: ${asset.path}`);
   const bytes = statSync(file).size;

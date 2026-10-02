@@ -110,6 +110,11 @@
         "bytes": 196518,
         "sha256": "f691cc5a57aa55389a91d5b93c00c7d6dbfe96446254365523a50828c326b662"
       }
-    ]
+    ],
+    "heroImage": {
+      "path": "../../public/maikada-hero.webp",
+      "bytes": 73396,
+      "sha256": "705c3b26a4b2808f808bb46fb6d51eb8180949bb7fb99bb543abad3c28f46a84"
+    }
   }
 }

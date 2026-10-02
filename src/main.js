@@ -26,10 +26,10 @@ app.innerHTML = `
       <div class="hero-copy"><p class="eyebrow"><span class="pulse"></span> REALITY, MADE INTERACTIVE</p>
         <h1>Let people <em>step inside</em> your space before they arrive.</h1>
         <p class="hero-lede">Photorealistic 3D walkthroughs for venues, properties and places. Captured in the real world. Ready to explore online.</p>
-        <div class="hero-actions"><a class="button button-primary" href="#work">Explore a real project <span>↗</span></a><a class="text-link" href="${whatsapp}" target="_blank" rel="noopener">Discuss your space <span>↗</span></a></div>
+        <div class="hero-actions"><button id="hero-primary-tour" class="button button-primary" type="button">Explore a real project <span>↗</span></button><a class="text-link" href="${whatsapp}" target="_blank" rel="noopener">Discuss your space <span>↗</span></a></div>
         <div class="hero-foot"><span>BASED IN LAHORE, PAKISTAN</span><span>CAPTURE  /  CREATE  /  SHARE</span></div>
       </div>
-      <div class="hero-art" aria-hidden="true"><div class="orb orb-one"></div><div class="orb orb-two"></div><div class="grid-floor"></div><div class="hero-art-label"><span>01 / 03</span><strong>SPACES, REIMAGINED</strong></div><div class="crosshair">+</div></div>
+      <div class="hero-art"><img class="hero-photo" src="${import.meta.env.BASE_URL}maikada-hero.webp" alt="Real 3D capture of Maikada Cafe's colourful lounge in Lahore" width="800" height="1000" fetchpriority="high" /><div class="hero-art-label"><span>LIVE CAPTURE</span><strong>MAIKADA CAFE · LAHORE</strong></div><button id="hero-open-tour" class="hero-entry" type="button">Enter the real 3D tour <span>↗</span></button></div>
     </section>
     <section class="ticker" aria-label="Services"><div>REALITY CAPTURE <span>✳</span> 3D WALKTHROUGHS <span>✳</span> WEB EXPERIENCES <span>✳</span> DIGITAL SPACES <span>✳</span> REALITY CAPTURE <span>✳</span> 3D WALKTHROUGHS</div></section>
     <section id="work" class="work shell section-pad"><div class="section-head"><div><p class="eyebrow">SELECTED WORK / 001</p><h2>See the difference<br><em>for yourself.</em></h2></div><p>A real space, captured in Lahore and made explorable in your browser.</p></div>
@@ -334,6 +334,8 @@ function closeTour() {
 }
 document.querySelector('#open-tour').addEventListener('click', openTour);
 document.querySelector('#open-tour-text').addEventListener('click', openTour);
+document.querySelector('#hero-open-tour').addEventListener('click', openTour);
+document.querySelector('#hero-primary-tour').addEventListener('click', openTour);
 document.querySelector('#close-tour').addEventListener('click', closeTour);
 const roomButtons = [document.querySelector('#tour-brick'), document.querySelector('#tour-lounge')];
 function goToRoom(position, target, activeButton) {
