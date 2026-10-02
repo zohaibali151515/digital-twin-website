@@ -94,10 +94,12 @@ Network speed still depends on chunk sizes, CDN cache hits and the visitor's loc
 
 ## Remaining quality gates
 
-1. Repeat the SPZ conversion using `scripts/build_maikada_spz.py` and compare important interior views with the original scan. The original PLY checksum is verified before conversion.
+1. Compare important interior views with the original scan after any conversion change. On 2026-10-02, `scripts/build_maikada_spz.py` rebuilt the 2,769,590-Gaussian, SH3 full-scene reference from the checksum-verified master. Its 57,306,183 bytes and SHA-256 `67b2fa462e9bd44968324aa82674596b28aaa882c73f088ac7e691bb250aaad3` matched the recorded reference exactly. The script now rejects a future full-scene rebuild with a different size or hash until it is reviewed. This proves reproducibility for the installed converter version, while visual comparison to the source remains a separate gate.
 2. Improve 3D delivery beyond the 804 KB panorama. The first interactive view waits for 7.1 MB, unrestricted translation for another 13.5 MB, and full café detail for a further 17.0 MB. The upper room still adds 19.1 MB. Physical mobile performance and more efficient large-scene delivery remain open.
 3. Measure first usable frame, transferred bytes, memory where available, frame rate and responsiveness on desktop and physical low/mid/high Android and iPhone devices. Browser emulation is a development check, not a substitute for those devices.
 4. Continue sustained Pixel 7 checks after the motion and landscape-control changes, including recovery after flying outside the scan. Verify another Android tier and iPhone before making broad mobile performance claims.
+
+A 2026-10-02 attempt to time the 350K opening core on the physical Pixel 7 did not produce a usable sample: Chrome moved to the background while WhatsApp was foregrounded, and its debugging endpoint stopped responding. The timing test should be repeated with Chrome open in the foreground.
 
 ## Public demo licensing gate
 
