@@ -122,9 +122,9 @@ async function openTour() {
         document.querySelector('#tour-status').textContent = 'Completing room…';
         document.querySelector('.tour-hint').textContent = 'Look around · Full navigation is loading';
       } else {
-        document.querySelector('#tour-status').textContent = detailReady
-          ? (upperReady ? 'LIVE 3D' : 'Café 3D ready')
-          : 'Café 3D · refining detail';
+        document.querySelector('#tour-status').textContent = panoramaRoom === 'lounge' && upperReady
+          ? 'Lounge 3D ready'
+          : detailReady ? (upperReady ? 'LIVE 3D' : 'Café 3D ready') : 'Café 3D · refining detail';
         document.querySelector('.tour-hint').textContent = 'Drag to orbit / Scroll or pinch to zoom / Right drag or two fingers to pan';
       }
     };
@@ -286,44 +286,56 @@ async function openTour() {
     document.querySelector('#tour-status').textContent = panoramaActive && panoramaRoom === 'lounge'
       ? '360 lounge · full 3D loading'
       : 'Café 3D · refining detail';
-    const previewTail = new SplatMesh({
-      url: `${import.meta.env.BASE_URL}maikada-preview-tail.spz`,
-      onProgress: event => diagnostics.assetProgress('detail', event)
-    });
-    viewer.previewTail = previewTail;
-    scene.add(previewTail);
-    try {
-      await previewTail.initialized;
-      detailReady = true;
-      diagnostics.mark('detail');
-      if (!panoramaActive) document.querySelector('#tour-status').textContent = 'Café 3D ready';
-    } catch (error) {
-      console.error('Could not load café detail:', error);
-      scene.remove(previewTail);
-      document.querySelector('#tour-status').textContent = 'Café 3D · detail unavailable';
-    }
-    const upper = new SplatMesh({
-      url: `${import.meta.env.BASE_URL}maikada-upper.spz`,
-      onProgress: event => diagnostics.assetProgress('lounge', event)
-    });
-    viewer.upper = upper;
-    scene.add(upper);
-    try {
-      await upper.initialized;
-      upperReady = true;
-      diagnostics.mark('lounge');
-      roomButtons[1].textContent = 'Lounge';
-      document.querySelector('#tour-lounge').disabled = false;
-      document.querySelector('#tour-lounge').title = 'Explore the lounge';
-      document.querySelector('#tour-status').textContent = panoramaActive && panoramaRoom === 'lounge'
-        ? 'Finishing lounge 3D…'
-        : (detailReady ? 'LIVE 3D' : 'LIVE 3D · detail incomplete');
-      show3D();
-    } catch (error) {
-      console.error('Could not load lounge:', error);
-      scene.remove(upper);
-      document.querySelector('#tour-status').textContent = 'Café room ready';
-      document.querySelector('#tour-lounge').title = 'Lounge unavailable';
+    const loadTail = async () => {
+      const previewTail = new SplatMesh({
+        url: `${import.meta.env.BASE_URL}maikada-preview-tail.spz`,
+        onProgress: event => diagnostics.assetProgress('detail', event)
+      });
+      viewer.previewTail = previewTail;
+      scene.add(previewTail);
+      try {
+        await previewTail.initialized;
+        detailReady = true;
+        diagnostics.mark('detail');
+        if (!panoramaActive && panoramaRoom === 'cafe') document.querySelector('#tour-status').textContent = 'Café 3D ready';
+      } catch (error) {
+        console.error('Could not load café detail:', error);
+        scene.remove(previewTail);
+        if (panoramaRoom === 'cafe') document.querySelector('#tour-status').textContent = 'Café 3D · detail unavailable';
+      }
+    };
+    const loadUpper = async () => {
+      const upper = new SplatMesh({
+        url: `${import.meta.env.BASE_URL}maikada-upper.spz`,
+        onProgress: event => diagnostics.assetProgress('lounge', event)
+      });
+      viewer.upper = upper;
+      scene.add(upper);
+      try {
+        await upper.initialized;
+        upperReady = true;
+        diagnostics.mark('lounge');
+        roomButtons[1].textContent = 'Lounge';
+        document.querySelector('#tour-lounge').disabled = false;
+        document.querySelector('#tour-lounge').title = 'Explore the lounge';
+        document.querySelector('#tour-status').textContent = panoramaActive && panoramaRoom === 'lounge'
+          ? 'Finishing lounge 3D…'
+          : (detailReady ? 'LIVE 3D' : 'LIVE 3D · detail incomplete');
+        show3D();
+      } catch (error) {
+        console.error('Could not load lounge:', error);
+        scene.remove(upper);
+        document.querySelector('#tour-status').textContent = panoramaRoom === 'lounge'
+          ? 'Lounge 360 · 3D unavailable' : 'Café room ready';
+        document.querySelector('#tour-lounge').title = 'Lounge unavailable';
+      }
+    };
+    if (panoramaRoom === 'lounge') {
+      await loadUpper();
+      await loadTail();
+    } else {
+      await loadTail();
+      await loadUpper();
     }
   } catch (error) {
     console.error(error);
