@@ -39,6 +39,8 @@ The Streamed SOG format is documented as a spatial tree of chunks and LODs. The 
 - Smaller spatial crops of 16.8 MB (884K splats) and 25.3 MB (1.29M splats), both retaining SH3, failed a four-direction camera gate: the forward view had a large black hole while side and rear views looked more complete. They were rejected. An initial all-black comparison was caused by capturing before Spark's first visible frame; the reference full-band asset also appeared black under that timing. More spatial cuts should use matched multi-direction visual checks after the first visible frame before publication.
 - A camera-based split keeps the source splats relevant to the opening view plus a 70° horizontal and 55° vertical selection margin. Its 24.2 MB SH3 preview matched the 37.9 MB full-room reference in the opening desktop and mobile-sized views and at ±15° in the mobile comparison. A large leftward turn still has missing geometry; the viewer therefore limits turning to about ±10° and disables pan/zoom until the 13.5 MB complement loads. The completed two-part room matched the reference across eight tested camera directions. The full three-part delivery is 56.9 MB and retains 2,769,449 of 2,769,590 source Gaussians.
 - In a local Pixel 7-sized Chrome run with an 8 Mbps download cap, 150 ms latency and 4× CPU slowdown, the new opening view appeared at 29.9 seconds, full café navigation at 45.9 seconds and the lounge at 66.4 seconds, with no reported browser errors. The comparable previous two-band run reached the first room at 41.7 seconds and both rooms at 61.2 seconds. First visibility improves, but the entire tour finishes later; neither result proves physical-phone performance or a few-second mobile preview.
+- A six-face panorama rendered from the full-detail scan at the entry camera occupies 804,254 bytes. It uses the same browser camera for immediate rotation while the SPZ assets load, then hands off to the detailed 3D scene. The panorama is a fixed viewpoint and does not pretend to offer translation. On 2026-10-01, a local Pixel 7-sized Chrome run with an 8 Mbps cap, 150 ms latency and 4× CPU slowdown showed the panorama at 3.8 seconds, first 3D view at 32.9 seconds, and full café navigation at 47.8 seconds. Those timings are browser emulation, not a physical Pixel 7 benchmark. Full 3D still requires roughly 38 MB before unrestricted navigation. The scan behind the user is less complete, so some panorama directions also have weaker detail.
+- The viewer now has Orbit, room-limited Explore and unrestricted Fly modes. Fly uses drag to look, WASD/arrow movement in the view direction, Q/E for vertical movement and Shift for speed. Touch movement and vertical buttons were checked in a phone-sized Chrome browser. Fly has no collision mesh, so users can move into or outside scanned surfaces; Reset returns to the entrance.
 
 ## Asset architecture
 
@@ -47,6 +49,7 @@ Maikada Cafe/*.ply                 Local immutable master; excluded from Git
 assets/maikada/metadata.json       Master fingerprint and pipeline parameters
 assets/maikada/web/               Local generated working files; excluded from Git
 public/maikada-preview.spz         First restricted interactive view
+public/maikada/panorama/*.jpg       804 KB scan-rendered entry panorama
 public/maikada-remainder.spz       Completes unrestricted café navigation
 public/maikada-upper.spz           Completes the lounge
 assets/maikada/web/*.rad[c]        Local RAD streaming experiment; excluded from Git
@@ -72,9 +75,9 @@ Network speed still depends on chunk sizes, CDN cache hits and the visitor's loc
 ## Remaining quality gates
 
 1. Repeat the SPZ conversion using `scripts/build_maikada_spz.py` and compare important interior views with the original scan. The original PLY checksum is verified before conversion.
-2. Improve the 24.2 MB first-view download toward a few-second mobile preview while preserving source detail. Simple box crops failed matched-view checks. The camera-first split makes the opening view available sooner, but the full café room and lounge still take roughly the same total transfer and need faster delivery or better streaming.
+2. Improve 3D delivery beyond the 804 KB panorama. The panorama makes first look-around fast but translation still waits for roughly 38 MB of SPZ data. Simple box crops failed matched-view checks. The full café room and lounge still need faster delivery or better streaming.
 3. Measure first usable frame, transferred bytes, memory where available, frame rate and responsiveness on desktop and physical low/mid/high Android and iPhone devices. Browser emulation is a development check, not a substitute for those devices.
-4. Validate tour navigation across the rooms and a stable Pixel 7 experience before calling the digital twin complete.
+4. Validate Orbit, Explore and Fly on a physical Pixel 7, including touch, sustained frame rate, room jumps, and recovery after leaving the scan. Verify another Android tier and iPhone before making broad mobile performance claims.
 
 ## Public demo licensing gate
 

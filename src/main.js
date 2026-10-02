@@ -2,6 +2,7 @@ import './style.css';
 import './community.css';
 import { communityDemos } from './community-data.js';
 import { createTourNavigation } from './tour-navigation.js';
+import { createTourPanorama } from './tour-panorama.js';
 
 const phone = '923099652168';
 const message = encodeURIComponent('Hello Digital Twin, I would like a 3D walkthrough for my space.');
@@ -41,46 +42,21 @@ app.innerHTML = `
     <section id="contact" class="cta-section"><div class="shell cta-inner"><p class="eyebrow">LET'S MAKE YOUR SPACE EXPLORABLE</p><h2>Show them the place.<br><em>Before the visit.</em></h2><p>Tell us what you want to capture. We’ll suggest a practical first project and quote.</p><a class="button button-dark" href="${whatsapp}" target="_blank" rel="noopener">Message us on WhatsApp <span>↗</span></a><span class="cta-phone">+92 309 9652168</span></div></section>
   </main>
   <footer class="footer shell"><a class="brand" href="#top"><span class="brand-mark"><i></i><i></i><i></i></span><span>DIGITAL<span class="brand-light">TWIN</span></span></a><span>Real places, ready to explore.</span><span>Lahore, Pakistan · © ${new Date().getFullYear()}</span></footer>
-  <div class="tour-modal" id="tour-modal" role="dialog" aria-modal="true" aria-label="Maikada Cafe 3D walkthrough" hidden><div class="tour-toolbar"><div><strong>Maikada Cafe</strong><span>3D walkthrough · Lahore</span></div><div class="tour-toolbar-actions"><span id="tour-status">Preparing scene…</span><button id="close-tour" type="button" aria-label="Close 3D walkthrough">×</button></div></div><div id="tour-canvas"></div><div class="tour-rooms" aria-label="Explore rooms"><button id="tour-brick" type="button" aria-pressed="true">Café room</button><button id="tour-lounge" type="button" aria-pressed="false" disabled title="Loading lounge">Lounge</button></div><div class="tour-hint">Drag to orbit / Scroll or pinch to zoom / Right drag or two fingers to pan</div><div class="tour-move" aria-label="Walkthrough movement controls"><button type="button" data-move="forward" aria-label="Move forward">&uarr;</button><button type="button" data-move="left" aria-label="Move left">&larr;</button><button type="button" data-move="back" aria-label="Move backward">&darr;</button><button type="button" data-move="right" aria-label="Move right">&rarr;</button></div><div class="tour-help" id="tour-help-panel" hidden><strong>Explore Maikada</strong><p><b>Orbit:</b> drag to turn, scroll or pinch to zoom, right drag or two fingers to pan.</p><p><b>Explore:</b> drag to look around. Use W A S D or arrow keys to move, Q / E for down / up, and Shift to move faster. On a phone, use the arrow buttons.</p><p>Use Cafe room or Lounge to jump between spaces. Reset returns to the entrance.</p></div><div class="tour-controls" aria-label="Viewer controls"><button id="tour-orbit" type="button" aria-pressed="true" title="Orbit view">Orbit</button><button id="tour-explore" type="button" aria-pressed="false" title="Move through the space" disabled>Explore</button><button id="tour-reset" type="button" aria-label="Reset view">Reset</button><button id="tour-help" type="button" aria-expanded="false" aria-controls="tour-help-panel">Controls</button><button id="tour-fullscreen" type="button" aria-label="Toggle fullscreen">Fullscreen</button></div><div class="tour-loading" id="tour-loading" style="background-image:linear-gradient(#101517d9,#101517e8),url('${import.meta.env.BASE_URL}maikada-poster.jpg')"><div class="loading-ring"></div><strong>Opening the café room</strong><span>The full room and lounge will appear as the scan loads.</span><div class="tour-progress" aria-hidden="true"><span id="tour-progress-bar"></span></div></div></div>
+  <div class="tour-modal" id="tour-modal" role="dialog" aria-modal="true" aria-label="Maikada Cafe 3D walkthrough" hidden><div class="tour-toolbar"><div><strong>Maikada Cafe</strong><span>3D walkthrough · Lahore</span></div><div class="tour-toolbar-actions"><span id="tour-status">Preparing scene…</span><button id="close-tour" type="button" aria-label="Close 3D walkthrough">×</button></div></div><div id="tour-canvas"></div><div class="tour-rooms" aria-label="Explore rooms"><button id="tour-brick" type="button" aria-pressed="true">Café room</button><button id="tour-lounge" type="button" aria-pressed="false" disabled title="Loading lounge">Lounge</button></div><div class="tour-hint">Drag to orbit / Scroll or pinch to zoom / Right drag or two fingers to pan</div><div class="tour-move" aria-label="Walkthrough movement controls"><button type="button" data-move="forward" aria-label="Move forward">&uarr;</button><button type="button" data-move="left" aria-label="Move left">&larr;</button><button type="button" data-move="back" aria-label="Move backward">&darr;</button><button type="button" data-move="right" aria-label="Move right">&rarr;</button><button type="button" data-move="up" aria-label="Fly up">Up</button><button type="button" data-move="down" aria-label="Fly down">Down</button></div><div class="tour-help" id="tour-help-panel" hidden><strong>Explore Maikada</strong><p><b>Orbit:</b> drag to turn, scroll or pinch to zoom, right drag or two fingers to pan.</p><p><b>Explore:</b> drag to look around. Use W A S D or arrow keys to move, Q / E for down / up, and Shift to move faster. On a phone, use the arrow buttons.</p><p><b>Fly:</b> move in the direction you look. W A S D or arrows move, Q / E descend / ascend, and Shift increases speed. On a phone, use the arrows and Up / Down.</p><p>Use Cafe room or Lounge to jump between spaces. Reset returns to the entrance.</p></div><div class="tour-controls" aria-label="Viewer controls"><button id="tour-orbit" type="button" aria-pressed="true" title="Orbit view">Orbit</button><button id="tour-explore" type="button" aria-pressed="false" title="Move through the space" disabled>Explore</button><button id="tour-fly" type="button" aria-pressed="false" title="Fly freely through the scan" disabled>Fly</button><button id="tour-reset" type="button" aria-label="Reset view">Reset</button><button id="tour-help" type="button" aria-expanded="false" aria-controls="tour-help-panel">Controls</button><button id="tour-fullscreen" type="button" aria-label="Toggle fullscreen">Fullscreen</button></div><div class="tour-loading" id="tour-loading" style="background-image:linear-gradient(#101517d9,#101517e8),url('${import.meta.env.BASE_URL}maikada-poster.jpg')"><div class="loading-ring"></div><strong>Opening the café room</strong><span>The full room and lounge will appear as the scan loads.</span><div class="tour-progress" aria-hidden="true"><span id="tour-progress-bar"></span></div></div></div>
 `;
 
 let viewer;
 let loading = false;
 const modal = document.querySelector('#tour-modal');
-function waitForVisibleScene(renderer, timeoutMs = 12000) {
-  const gl = renderer.getContext();
-  const pixel = new Uint8Array(4);
-  const deadline = performance.now() + timeoutMs;
-  return new Promise((resolve, reject) => {
-    const check = () => {
-      if (performance.now() > deadline) {
-        reject(new Error('The scan loaded but did not become visible.'));
-        return;
-      }
-      const canvas = renderer.domElement;
-      const samples = [[0.5, 0.5], [0.35, 0.5], [0.65, 0.5]];
-      for (const [x, y] of samples) {
-        gl.readPixels(Math.floor(canvas.width * x), Math.floor(canvas.height * y), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
-        if (Math.abs(pixel[0] - 16) + Math.abs(pixel[1] - 21) + Math.abs(pixel[2] - 23) > 60) {
-          resolve();
-          return;
-        }
-      }
-      requestAnimationFrame(check);
-    };
-    requestAnimationFrame(check);
-  });
-}
 async function openTour() {
   modal.hidden = false;
   document.body.classList.add('modal-open');
   if (viewer || loading) return;
   loading = true;
   try {
-    const [THREE, { OrbitControls }, { SparkRenderer, SplatMesh }] = await Promise.all([
+    const [THREE, { OrbitControls }] = await Promise.all([
       import('three'),
-      import('three/addons/controls/OrbitControls.js'),
-      import('@sparkjsdev/spark')
+      import('three/addons/controls/OrbitControls.js')
     ]);
     const target = document.querySelector('#tour-canvas');
     const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
@@ -96,25 +72,65 @@ async function openTour() {
     controls.enableDamping = true;
     controls.update();
     const navigation = createTourNavigation(camera, controls, renderer.domElement, modal);
-    scene.add(new SparkRenderer({ renderer }));
-    const preview = new SplatMesh({
-      url: `${import.meta.env.BASE_URL}maikada-preview.spz`,
-      onProgress: event => {
-        if (event.lengthComputable) {
-          const percent = Math.round(event.loaded / event.total * 100);
-          document.querySelector('#tour-status').textContent = `Opening view ${percent}%`;
-          document.querySelector('#tour-progress-bar').style.width = `${Math.min(90, percent * 0.9)}%`;
-        }
-      }
-    });
-    scene.add(preview);
+    let panorama;
+    try {
+      panorama = await createTourPanorama(THREE, import.meta.env.BASE_URL);
+    } catch (error) {
+      console.warn('Panorama unavailable; opening 3D scene directly:', error);
+    }
+    let panoramaActive = Boolean(panorama);
+    let scanHasPixels = false;
+    let previewReady = false;
+    let roomReady = false;
+    const gl = renderer.getContext();
+    const pixel = new Uint8Array(4);
+    controls.enableZoom = false;
+    controls.enablePan = false;
+    if (panoramaActive) {
+      document.querySelector('#tour-loading').hidden = true;
+      document.querySelector('#tour-status').textContent = '360 preview · loading 3D';
+      document.querySelector('.tour-hint').textContent = '360 preview · Drag to look around while the 3D walkthrough loads';
+    }
     let qualityWindowStart = 0;
     let qualityFrames = 0;
     let qualityReady = false;
+    const show3D = () => {
+      if (!panoramaActive) return;
+      panoramaActive = false;
+      panorama.dispose();
+      qualityReady = true;
+      if (!roomReady) {
+        controls.minAzimuthAngle = -Math.PI / 2 - 0.17;
+        controls.maxAzimuthAngle = -Math.PI / 2 + 0.17;
+        controls.minPolarAngle = Math.PI / 2 - 0.07;
+        controls.maxPolarAngle = Math.PI / 2 + 0.07;
+        document.querySelector('#tour-status').textContent = 'Completing room…';
+        document.querySelector('.tour-hint').textContent = 'Look around · Full navigation is loading';
+      }
+    };
     renderer.setAnimationLoop(() => {
       if (modal.hidden) return;
       navigation.update();
       renderer.render(scene, camera);
+      if (panoramaActive) {
+        const direction = new THREE.Vector3();
+        camera.getWorldDirection(direction);
+        const facingEntry = direction.x > Math.cos(0.12);
+        if (previewReady && facingEntry && !scanHasPixels) {
+          for (const [x, y] of [[0.5, 0.5], [0.35, 0.5], [0.65, 0.5]]) {
+            gl.readPixels(Math.floor(renderer.domElement.width * x), Math.floor(renderer.domElement.height * y), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+            if (Math.abs(pixel[0] - 16) + Math.abs(pixel[1] - 21) + Math.abs(pixel[2] - 23) > 60) {
+              scanHasPixels = true;
+              break;
+            }
+          }
+        }
+        if (previewReady && facingEntry && scanHasPixels) show3D();
+        if (panoramaActive) {
+          panorama.update(camera);
+          renderer.render(panorama.scene, camera);
+        }
+      }
       if (qualityReady && renderer.getPixelRatio() > 1.25) {
         const now = performance.now();
         if (!qualityWindowStart) qualityWindowStart = now;
@@ -137,25 +153,31 @@ async function openTour() {
       renderer.setSize(target.clientWidth, target.clientHeight);
     };
     window.addEventListener('resize', resize);
-    viewer = { renderer, scene, camera, controls, navigation, preview, resize };
+    viewer = { renderer, scene, camera, controls, navigation, resize };
+    const { SparkRenderer, SplatMesh } = await import('@sparkjsdev/spark');
+    scene.add(new SparkRenderer({ renderer }));
+    const preview = new SplatMesh({
+      url: `${import.meta.env.BASE_URL}maikada-preview.spz`,
+      onProgress: event => {
+        if (event.lengthComputable) {
+          const percent = Math.round(event.loaded / event.total * 100);
+          document.querySelector('#tour-status').textContent = `3D loading ${percent}%`;
+        }
+      }
+    });
+    viewer.preview = preview;
+    scene.add(preview);
     await preview.initialized;
-    await waitForVisibleScene(renderer);
-    qualityReady = true;
-    controls.minAzimuthAngle = -Math.PI / 2 - 0.17;
-    controls.maxAzimuthAngle = -Math.PI / 2 + 0.17;
-    controls.minPolarAngle = Math.PI / 2 - 0.07;
-    controls.maxPolarAngle = Math.PI / 2 + 0.07;
-    controls.enablePan = false;
-    controls.enableZoom = false;
-    document.querySelector('#tour-progress-bar').style.width = '100%';
-    document.querySelector('#tour-loading').hidden = true;
-    document.querySelector('#tour-status').textContent = 'Completing room…';
-    document.querySelector('.tour-hint').textContent = 'Look around · Full navigation is loading';
+    previewReady = true;
+    if (!panoramaActive) document.querySelector('#tour-loading').hidden = true;
+    document.querySelector('#tour-status').textContent = panoramaActive ? 'Finishing 3D room…' : 'Completing room…';
     const remainder = new SplatMesh({ url: `${import.meta.env.BASE_URL}maikada-remainder.spz` });
     viewer.remainder = remainder;
     scene.add(remainder);
     await remainder.initialized;
     await new Promise(resolve => setTimeout(resolve, 1500));
+    roomReady = true;
+    show3D();
     controls.minAzimuthAngle = -Infinity;
     controls.maxAzimuthAngle = Infinity;
     controls.minPolarAngle = 0;
@@ -163,6 +185,7 @@ async function openTour() {
     controls.enablePan = true;
     controls.enableZoom = true;
     document.querySelector('#tour-explore').disabled = false;
+    document.querySelector('#tour-fly').disabled = false;
     document.querySelector('.tour-hint').textContent = 'Drag to orbit / Scroll or pinch to zoom / Right drag or two fingers to pan';
     document.querySelector('#tour-status').textContent = 'Loading lounge…';
     const upper = new SplatMesh({ url: `${import.meta.env.BASE_URL}maikada-upper.spz` });
@@ -215,6 +238,7 @@ roomButtons[0].addEventListener('click', () => goToRoom([0, -3.5, 2], [1, -3.5, 
 roomButtons[1].addEventListener('click', () => goToRoom([1, 0, 2], [2, 0, 2], roomButtons[1]));
 document.querySelector('#tour-orbit').addEventListener('click', () => viewer?.navigation.setMode('orbit'));
 document.querySelector('#tour-explore').addEventListener('click', () => viewer?.navigation.setMode('explore'));
+document.querySelector('#tour-fly').addEventListener('click', () => viewer?.navigation.setMode('fly'));
 document.querySelector('#tour-help').addEventListener('click', () => {
   const panel = document.querySelector('#tour-help-panel');
   panel.hidden = !panel.hidden;
