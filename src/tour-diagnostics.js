@@ -24,10 +24,11 @@ export function createTourDiagnostics(modal) {
       <div><dt>Café full detail</dt><dd data-stat="detail">Waiting</dd></div>
       <div><dt>Lounge 3D data</dt><dd data-stat="lounge">Waiting</dd></div>
       <div><dt>Scene data loaded</dt><dd data-stat="transfer">0.0 MB</dd></div>
+      <div><dt>Network received</dt><dd data-stat="network">0.0 MB</dd></div>
       <div><dt>Frame rate</dt><dd data-stat="fps">Waiting</dd></div>
       <div><dt>JS heap</dt><dd data-stat="heap">Unavailable</dd></div>
     </dl>
-    <small>Elapsed from opening the tour. Scene data includes cached files; it is not network usage. JS heap excludes GPU memory. Nothing is uploaded.</small>
+    <small>Elapsed from opening the tour. Scene data includes cached files. Network received is the browser's same-origin transfer estimate; cached resources can read as zero. JS heap excludes GPU memory. Nothing is uploaded.</small>
     <button class="diagnostics-copy" type="button">Copy results</button>`;
   modal.appendChild(panel);
   const set = (name, value) => { panel.querySelector(`[data-stat="${name}"]`).textContent = value; };
@@ -35,9 +36,15 @@ export function createTourDiagnostics(modal) {
     const bytes = [...assetBytes.values()].reduce((total, value) => total + value, 0);
     set('transfer', `${(bytes / 1_000_000).toFixed(1)} MB`);
   };
+  const network = () => {
+    const entries = performance.getEntriesByType('resource');
+    const bytes = entries.reduce((total, entry) => total + (entry.transferSize || 0), 0);
+    set('network', `${(bytes / 1_000_000).toFixed(1)} MB`);
+  };
   const copy = panel.querySelector('.diagnostics-copy');
   copy.addEventListener('click', async () => {
     transfer();
+    network();
     const readings = [...panel.querySelectorAll('dl > div')].map(row =>
       `${row.querySelector('dt').textContent}: ${row.querySelector('dd').textContent}`
     );
@@ -55,6 +62,7 @@ export function createTourDiagnostics(modal) {
       if (!Number.isFinite(event.loaded)) return;
       assetBytes.set(name, Math.max(assetBytes.get(name) || 0, event.loaded));
       transfer();
+      network();
     },
     mark(name) {
       if (marks[name]) return;
@@ -66,6 +74,7 @@ export function createTourDiagnostics(modal) {
       const now = performance.now();
       if (now - lastFrameWindow < 2000) return;
       set('fps', `${Math.round(frames * 1000 / (now - lastFrameWindow))} fps`);
+      network();
       if (performance.memory?.usedJSHeapSize) {
         set('heap', `${Math.round(performance.memory.usedJSHeapSize / 1048576)} MB`);
       }
