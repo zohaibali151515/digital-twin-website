@@ -1,10 +1,12 @@
 from pathlib import Path
 import subprocess
 import numpy as np
-from build_maikada_streamed import verify_source
+from build_maikada_streamed import CLI, verify_source
 
 root = Path(__file__).resolve().parents[1]
 verify_source()
+if not CLI.exists():
+    raise FileNotFoundError('Run npm ci before generating Maikada assets')
 source = root / 'assets/maikada/web/maikada-preview.ply'
 count = 1160652
 with source.open('rb') as file:
@@ -42,7 +44,6 @@ for name, selected in [('core', mask), ('tail', ~mask)]:
             part = rows[start:start + 100000]
             file.write(part[selected[start:start + 100000]].tobytes())
     print(output, new_count, output.stat().st_size, flush=True)
-    cli = root / 'node_modules/.bin/splat-transform.cmd'
-    subprocess.run([str(cli), '-w', str(output), '-r', '90,0,0',
+    subprocess.run([str(CLI), '-w', str(output), '-r', '90,0,0',
                     str(output.with_suffix('.spz')), '--spz-version', '3'],
                    cwd=root, check=True)

@@ -2,7 +2,7 @@
 
 These scenes are independent creators' work. They are embedded with SuperSplat's official embed URL (`https://superspl.at/s?id=...`), not presented as Digital Twin client work. Their preview images are copied from each scene's Open Graph image and credited on the corresponding demo page. The scene models are hosted by SuperSplat; no third-party PLY is committed to this repository.
 
-Each source page displayed a machine-readable link to [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) on 2026-09-30. CC BY 4.0 permits commercial use, sharing/redistribution and adaptations with attribution and a license link. The `scripts/collect_demo_thumbnails.py` command rechecks that exact license link before refreshing previews. Recheck the source page if replacing a model or changing how it is hosted.
+Each source page displayed a CC BY 4.0 label when rechecked on 2026-10-02, and all seven official embed URLs returned HTTP 200. [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) permits commercial use, sharing/redistribution and adaptations with attribution and a license link. The `scripts/collect_demo_thumbnails.py` command rechecks the exact machine-readable license link before refreshing previews. Recheck the source page if replacing a model or changing how it is hosted.
 
 | Demo | Creator | Original scene and license record | Capture note | Additional credit |
 | --- | --- | --- | --- | --- |

@@ -12,8 +12,13 @@ const camera = new THREE.PerspectiveCamera(90, 1, 0.02, 200);
 const origin = new URLSearchParams(location.search).get('origin')?.split(',').map(Number) || [0, -3.5, 2];
 if (origin.length !== 3 || origin.some(value => !Number.isFinite(value))) throw new Error('Invalid panorama origin');
 camera.position.set(...origin);
-const meshes = ['maikada-preview.spz', 'maikada-remainder.spz', 'maikada-upper.spz'].map(name => {
-  const mesh = new SplatMesh({ url: `/${name}` });
+const meshes = [
+  'maikada-preview-core.spz',
+  'maikada-remainder.spz',
+  'maikada-preview-tail.spz',
+  'maikada-upper.spz'
+].map(name => {
+  const mesh = new SplatMesh({ url: `${import.meta.env.BASE_URL}${name}` });
   scene.add(mesh);
   return mesh;
 });
