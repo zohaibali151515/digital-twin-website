@@ -238,7 +238,7 @@ async function openTour() {
     const { SparkRenderer, SplatMesh } = await import('@sparkjsdev/spark');
     scene.add(new SparkRenderer({ renderer }));
     const preview = new SplatMesh({
-      url: `${import.meta.env.BASE_URL}maikada-preview.spz`,
+      url: `${import.meta.env.BASE_URL}maikada-preview-core.spz`,
       onProgress: event => {
         if (event.lengthComputable) {
           const percent = Math.round(event.loaded / event.total * 100);
@@ -256,6 +256,10 @@ async function openTour() {
       diagnostics.mark('threeD');
     }
     document.querySelector('#tour-status').textContent = panoramaActive ? 'Finishing 3D room…' : 'Completing room…';
+    const previewTail = new SplatMesh({ url: `${import.meta.env.BASE_URL}maikada-preview-tail.spz` });
+    viewer.previewTail = previewTail;
+    scene.add(previewTail);
+    await previewTail.initialized;
     const remainder = new SplatMesh({ url: `${import.meta.env.BASE_URL}maikada-remainder.spz` });
     viewer.remainder = remainder;
     scene.add(remainder);
