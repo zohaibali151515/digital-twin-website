@@ -94,6 +94,8 @@ async function openTour() {
     let qualityWindowStart = 0;
     let qualityFrames = 0;
     let qualityReady = false;
+    let lastScanProbe = 0;
+    const viewDirection = new THREE.Vector3();
     const show3D = () => {
       if (!panoramaActive) return;
       panoramaActive = false;
@@ -111,12 +113,13 @@ async function openTour() {
     renderer.setAnimationLoop(() => {
       if (modal.hidden) return;
       navigation.update();
-      renderer.render(scene, camera);
       if (panoramaActive) {
-        const direction = new THREE.Vector3();
-        camera.getWorldDirection(direction);
-        const facingEntry = direction.x > Math.cos(0.12);
-        if (previewReady && facingEntry && !scanHasPixels) {
+        camera.getWorldDirection(viewDirection);
+        const facingEntry = viewDirection.x > Math.cos(0.12);
+        const now = performance.now();
+        if (previewReady && facingEntry && !scanHasPixels && now - lastScanProbe > 150) {
+          lastScanProbe = now;
+          renderer.render(scene, camera);
           for (const [x, y] of [[0.5, 0.5], [0.35, 0.5], [0.65, 0.5]]) {
             gl.readPixels(Math.floor(renderer.domElement.width * x), Math.floor(renderer.domElement.height * y), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
             if (Math.abs(pixel[0] - 16) + Math.abs(pixel[1] - 21) + Math.abs(pixel[2] - 23) > 60) {
@@ -130,6 +133,8 @@ async function openTour() {
           panorama.update(camera);
           renderer.render(panorama.scene, camera);
         }
+      } else {
+        renderer.render(scene, camera);
       }
       if (qualityReady && renderer.getPixelRatio() > 1.25) {
         const now = performance.now();
@@ -169,7 +174,10 @@ async function openTour() {
     scene.add(preview);
     await preview.initialized;
     previewReady = true;
-    if (!panoramaActive) document.querySelector('#tour-loading').hidden = true;
+    if (!panoramaActive) {
+      document.querySelector('#tour-loading').hidden = true;
+      qualityReady = true;
+    }
     document.querySelector('#tour-status').textContent = panoramaActive ? 'Finishing 3D room…' : 'Completing room…';
     const remainder = new SplatMesh({ url: `${import.meta.env.BASE_URL}maikada-remainder.spz` });
     viewer.remainder = remainder;
@@ -228,7 +236,7 @@ function goToRoom(position, target, activeButton) {
   if (!viewer) return;
   viewer.camera.position.set(...position);
   viewer.controls.target.set(...target);
-  if (viewer.navigation.mode === 'explore') viewer.camera.lookAt(...target);
+  if (viewer.navigation.mode !== 'orbit') viewer.camera.lookAt(...target);
   viewer.controls.update();
   viewer.navigation.syncLook();
   viewer.navigation.setRoom(activeButton === roomButtons[1] ? 'lounge' : 'cafe');
