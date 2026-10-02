@@ -243,6 +243,7 @@ async function openTour() {
     const preview = new SplatMesh({
       url: `${import.meta.env.BASE_URL}maikada-preview-core.spz`,
       onProgress: event => {
+        diagnostics.assetProgress('core', event);
         if (event.lengthComputable) {
           const percent = Math.round(event.loaded / event.total * 100);
           document.querySelector('#tour-status').textContent = `3D loading ${percent}%`;
@@ -252,6 +253,7 @@ async function openTour() {
     viewer.preview = preview;
     scene.add(preview);
     await preview.initialized;
+    diagnostics.mark('core');
     previewReady = true;
     if (!panoramaActive) {
       document.querySelector('#tour-loading').hidden = true;
@@ -259,7 +261,10 @@ async function openTour() {
       diagnostics.mark('threeD');
     }
     document.querySelector('#tour-status').textContent = panoramaActive ? 'Finishing 3D room…' : 'Completing room…';
-    const remainder = new SplatMesh({ url: `${import.meta.env.BASE_URL}maikada-remainder.spz` });
+    const remainder = new SplatMesh({
+      url: `${import.meta.env.BASE_URL}maikada-remainder.spz`,
+      onProgress: event => diagnostics.assetProgress('room', event)
+    });
     viewer.remainder = remainder;
     scene.add(remainder);
     await remainder.initialized;
@@ -281,7 +286,10 @@ async function openTour() {
     document.querySelector('#tour-status').textContent = panoramaActive && panoramaRoom === 'lounge'
       ? '360 lounge · full 3D loading'
       : 'Café 3D · refining detail';
-    const previewTail = new SplatMesh({ url: `${import.meta.env.BASE_URL}maikada-preview-tail.spz` });
+    const previewTail = new SplatMesh({
+      url: `${import.meta.env.BASE_URL}maikada-preview-tail.spz`,
+      onProgress: event => diagnostics.assetProgress('detail', event)
+    });
     viewer.previewTail = previewTail;
     scene.add(previewTail);
     try {
@@ -294,7 +302,10 @@ async function openTour() {
       scene.remove(previewTail);
       document.querySelector('#tour-status').textContent = 'Café 3D · detail unavailable';
     }
-    const upper = new SplatMesh({ url: `${import.meta.env.BASE_URL}maikada-upper.spz` });
+    const upper = new SplatMesh({
+      url: `${import.meta.env.BASE_URL}maikada-upper.spz`,
+      onProgress: event => diagnostics.assetProgress('lounge', event)
+    });
     viewer.upper = upper;
     scene.add(upper);
     try {

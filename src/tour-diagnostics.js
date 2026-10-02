@@ -2,11 +2,12 @@
 // No readings are sent to a server.
 export function createTourDiagnostics(modal) {
   if (new URLSearchParams(location.search).get('diagnostics') !== '1') {
-    return { mark() {}, frame() {} };
+    return { mark() {}, frame() {}, assetProgress() {} };
   }
 
   const started = performance.now();
   const marks = {};
+  const assetBytes = new Map();
   let frames = 0;
   let lastFrameWindow = started;
   const panel = document.createElement('aside');
@@ -17,17 +18,44 @@ export function createTourDiagnostics(modal) {
     <dl>
       <div><dt>360 preview</dt><dd data-stat="preview">Waiting</dd></div>
       <div><dt>Lounge 360</dt><dd data-stat="lounge360">Not opened</dd></div>
+      <div><dt>First 3D asset</dt><dd data-stat="core">Waiting</dd></div>
       <div><dt>3D shown</dt><dd data-stat="threeD">Waiting</dd></div>
       <div><dt>Café navigation</dt><dd data-stat="room">Waiting</dd></div>
       <div><dt>Café full detail</dt><dd data-stat="detail">Waiting</dd></div>
       <div><dt>Lounge 3D data</dt><dd data-stat="lounge">Waiting</dd></div>
+      <div><dt>Scene data loaded</dt><dd data-stat="transfer">0.0 MB</dd></div>
       <div><dt>Frame rate</dt><dd data-stat="fps">Waiting</dd></div>
       <div><dt>JS heap</dt><dd data-stat="heap">Unavailable</dd></div>
     </dl>
-    <small>Elapsed from opening the tour. Frame rate is browser frame cadence; JS heap excludes GPU memory. No data is uploaded.</small>`;
+    <small>Elapsed from opening the tour. Scene data includes cached files; it is not network usage. JS heap excludes GPU memory. Nothing is uploaded.</small>
+    <button class="diagnostics-copy" type="button">Copy results</button>`;
   modal.appendChild(panel);
   const set = (name, value) => { panel.querySelector(`[data-stat="${name}"]`).textContent = value; };
+  const transfer = () => {
+    const bytes = [...assetBytes.values()].reduce((total, value) => total + value, 0);
+    set('transfer', `${(bytes / 1_000_000).toFixed(1)} MB`);
+  };
+  const copy = panel.querySelector('.diagnostics-copy');
+  copy.addEventListener('click', async () => {
+    transfer();
+    const readings = [...panel.querySelectorAll('dl > div')].map(row =>
+      `${row.querySelector('dt').textContent}: ${row.querySelector('dd').textContent}`
+    );
+    const report = ['Maikada viewer diagnostics', `Viewport: ${innerWidth} × ${innerHeight} at ${devicePixelRatio} DPR`, ...readings,
+      'Connection: please add Wi-Fi or mobile data'].join('\n');
+    try {
+      await navigator.clipboard.writeText(report);
+      copy.textContent = 'Copied — paste into chat';
+    } catch {
+      copy.textContent = 'Copy unavailable — send a screenshot';
+    }
+  });
   return {
+    assetProgress(name, event) {
+      if (!Number.isFinite(event.loaded)) return;
+      assetBytes.set(name, Math.max(assetBytes.get(name) || 0, event.loaded));
+      transfer();
+    },
     mark(name) {
       if (marks[name]) return;
       marks[name] = performance.now() - started;
