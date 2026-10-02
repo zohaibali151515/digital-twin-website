@@ -74,6 +74,14 @@ async function openTour() {
     controls.enableDamping = true;
     controls.update();
     const navigation = createTourNavigation(camera, controls, renderer.domElement, modal);
+    const heldPointers = new Set();
+    let lastInteraction = 0;
+    const touched = () => { lastInteraction = performance.now(); };
+    renderer.domElement.addEventListener('pointerdown', event => { heldPointers.add(event.pointerId); touched(); });
+    renderer.domElement.addEventListener('pointermove', event => { if (heldPointers.has(event.pointerId)) touched(); });
+    window.addEventListener('pointerup', event => { heldPointers.delete(event.pointerId); touched(); });
+    window.addEventListener('pointercancel', event => { heldPointers.delete(event.pointerId); touched(); });
+    renderer.domElement.addEventListener('wheel', touched, { passive: true });
     let panorama;
     try {
       panorama = await createTourPanorama(THREE, import.meta.env.BASE_URL);
@@ -103,7 +111,13 @@ async function openTour() {
     let qualityWindowStart = 0;
     let qualityFrames = 0;
     let qualityReady = false;
+    let qualityCalibrated = false;
+    let fullQualityWindowStarted = false;
+    let smoothMotion = false;
     let lastScanProbe = 0;
+    let lastRenderedAt = 0;
+    const lastRenderedPosition = camera.position.clone();
+    const lastRenderedRotation = camera.quaternion.clone();
     const viewDirection = new THREE.Vector3();
     const show3D = () => {
       if (!panoramaActive) return;
@@ -171,8 +185,18 @@ async function openTour() {
     };
     renderer.setAnimationLoop(() => {
       if (modal.hidden) return;
-      diagnostics.frame();
       navigation.update();
+      const frameNow = performance.now();
+      const cameraMoved = camera.position.distanceToSquared(lastRenderedPosition) > 0.000001
+        || camera.quaternion.angleTo(lastRenderedRotation) > 0.0005;
+      const idle = qualityCalibrated && detailReady && upperReady && !panoramaActive
+        && heldPointers.size === 0 && !navigation.isMoving
+        && frameNow - lastInteraction > 1000 && !cameraMoved;
+      if (idle && frameNow - lastRenderedAt < 400) return;
+      if (smoothMotion && detailReady && viewer?.previewTail) {
+        viewer.previewTail.visible = heldPointers.size === 0 && !navigation.isMoving
+          && performance.now() - lastInteraction > 500;
+      }
       if (panoramaActive) {
         camera.getWorldDirection(viewDirection);
         const facingEntry = viewDirection.x > Math.cos(0.12);
@@ -207,16 +231,27 @@ async function openTour() {
       } else {
         renderer.render(scene, camera);
       }
-      if (qualityReady && renderer.getPixelRatio() > 1.25) {
-        const now = performance.now();
+      lastRenderedAt = frameNow;
+      lastRenderedPosition.copy(camera.position);
+      lastRenderedRotation.copy(camera.quaternion);
+      diagnostics.frame(idle);
+      if (qualityReady && !qualityCalibrated) {
+        const now = frameNow;
+        if (detailReady && upperReady && !fullQualityWindowStarted) {
+          qualityWindowStart = 0;
+          qualityFrames = 0;
+          fullQualityWindowStarted = true;
+        }
         if (!qualityWindowStart) qualityWindowStart = now;
         qualityFrames++;
         if (now - qualityWindowStart >= 5000) {
           const fps = qualityFrames * 1000 / (now - qualityWindowStart);
-          if (fps < 35) {
+          if (fps < 35 && renderer.getPixelRatio() > 1.25) {
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
             renderer.setSize(target.clientWidth, target.clientHeight);
           }
+          if (fps < 25) smoothMotion = true;
+          if (fullQualityWindowStarted) qualityCalibrated = true;
           qualityWindowStart = now;
           qualityFrames = 0;
         }
@@ -232,7 +267,9 @@ async function openTour() {
     viewer = { renderer, scene, camera, controls, navigation, resize, showPanoramaRoom,
       get panoramaActive() { return panoramaActive; },
       get roomReady() { return roomReady; },
-      get upperReady() { return upperReady; } };
+      get upperReady() { return upperReady; },
+      get smoothMotion() { return smoothMotion; },
+      resetMotion() { heldPointers.clear(); lastInteraction = 0; if (viewer?.previewTail) viewer.previewTail.visible = true; } };
     if (panoramaActive) {
       roomButtons[1].disabled = false;
       roomButtons[1].textContent = 'Lounge (360)';
@@ -352,6 +389,7 @@ function closeTour() {
   modal.hidden = true;
   document.body.classList.remove('modal-open');
   viewer?.navigation.resetInput();
+  viewer?.resetMotion();
   document.querySelector('#tour-help-panel').hidden = true;
   document.querySelector('#tour-help').setAttribute('aria-expanded', 'false');
 }

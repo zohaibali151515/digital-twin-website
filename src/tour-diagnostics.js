@@ -69,11 +69,11 @@ export function createTourDiagnostics(modal) {
       marks[name] = performance.now() - started;
       set(name, `${(marks[name] / 1000).toFixed(1)} s`);
     },
-    frame() {
+    frame(idle = false) {
       frames++;
       const now = performance.now();
       if (now - lastFrameWindow < 2000) return;
-      set('fps', `${Math.round(frames * 1000 / (now - lastFrameWindow))} fps`);
+      set('fps', `${Math.round(frames * 1000 / (now - lastFrameWindow))} fps${idle ? ' (idle)' : ''}`);
       network();
       if (performance.memory?.usedJSHeapSize) {
         set('heap', `${Math.round(performance.memory.usedJSHeapSize / 1048576)} MB`);

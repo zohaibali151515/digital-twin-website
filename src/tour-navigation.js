@@ -102,6 +102,7 @@ export function createTourNavigation(camera, orbit, canvas, modal) {
   modal.dataset.navMode = mode;
   return {
     get mode() { return mode; },
+    get isMoving() { return keys.size > 0 || movement.size > 0; },
     setRoom(next) { room = next; },
     setMode,
     resetInput() { keys.clear(); movement.clear(); look.dragging = false; },
