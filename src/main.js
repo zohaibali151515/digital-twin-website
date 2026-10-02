@@ -88,6 +88,7 @@ async function openTour() {
     let loungeVisibleFrames = 0;
     let previewReady = false;
     let roomReady = false;
+    let detailReady = false;
     let upperReady = false;
     const gl = renderer.getContext();
     const pixel = new Uint8Array(4);
@@ -121,7 +122,9 @@ async function openTour() {
         document.querySelector('#tour-status').textContent = 'Completing room…';
         document.querySelector('.tour-hint').textContent = 'Look around · Full navigation is loading';
       } else {
-        document.querySelector('#tour-status').textContent = upperReady ? 'LIVE 3D' : 'Café 3D ready';
+        document.querySelector('#tour-status').textContent = detailReady
+          ? (upperReady ? 'LIVE 3D' : 'Café 3D ready')
+          : 'Café 3D · refining detail';
         document.querySelector('.tour-hint').textContent = 'Drag to orbit / Scroll or pinch to zoom / Right drag or two fingers to pan';
       }
     };
@@ -256,10 +259,6 @@ async function openTour() {
       diagnostics.mark('threeD');
     }
     document.querySelector('#tour-status').textContent = panoramaActive ? 'Finishing 3D room…' : 'Completing room…';
-    const previewTail = new SplatMesh({ url: `${import.meta.env.BASE_URL}maikada-preview-tail.spz` });
-    viewer.previewTail = previewTail;
-    scene.add(previewTail);
-    await previewTail.initialized;
     const remainder = new SplatMesh({ url: `${import.meta.env.BASE_URL}maikada-remainder.spz` });
     viewer.remainder = remainder;
     scene.add(remainder);
@@ -281,7 +280,20 @@ async function openTour() {
       : 'Drag to orbit / Scroll or pinch to zoom / Right drag or two fingers to pan';
     document.querySelector('#tour-status').textContent = panoramaActive && panoramaRoom === 'lounge'
       ? '360 lounge · full 3D loading'
-      : 'Café 3D ready';
+      : 'Café 3D · refining detail';
+    const previewTail = new SplatMesh({ url: `${import.meta.env.BASE_URL}maikada-preview-tail.spz` });
+    viewer.previewTail = previewTail;
+    scene.add(previewTail);
+    try {
+      await previewTail.initialized;
+      detailReady = true;
+      diagnostics.mark('detail');
+      if (!panoramaActive) document.querySelector('#tour-status').textContent = 'Café 3D ready';
+    } catch (error) {
+      console.error('Could not load café detail:', error);
+      scene.remove(previewTail);
+      document.querySelector('#tour-status').textContent = 'Café 3D · detail unavailable';
+    }
     const upper = new SplatMesh({ url: `${import.meta.env.BASE_URL}maikada-upper.spz` });
     viewer.upper = upper;
     scene.add(upper);
@@ -292,7 +304,9 @@ async function openTour() {
       roomButtons[1].textContent = 'Lounge';
       document.querySelector('#tour-lounge').disabled = false;
       document.querySelector('#tour-lounge').title = 'Explore the lounge';
-      document.querySelector('#tour-status').textContent = panoramaActive && panoramaRoom === 'lounge' ? 'Finishing lounge 3D…' : 'LIVE 3D';
+      document.querySelector('#tour-status').textContent = panoramaActive && panoramaRoom === 'lounge'
+        ? 'Finishing lounge 3D…'
+        : (detailReady ? 'LIVE 3D' : 'LIVE 3D · detail incomplete');
       show3D();
     } catch (error) {
       console.error('Could not load lounge:', error);

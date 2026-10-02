@@ -11,7 +11,7 @@
   },
   "web": {
     "status": "published",
-    "strategy": "Scan-rendered 360-degree cafe and on-demand lounge previews, 350K camera-first SH3 core, lossless preview complement, first-room complement, then upper room, rendered with Spark 2.2",
+    "strategy": "Scan-rendered 360-degree cafe and on-demand lounge previews, 350K camera-first SH3 core, first-room complement to unlock navigation, lossless fine-detail complement, then upper room, rendered with Spark 2.2",
     "panorama": [
       {
         "path": "../../public/maikada/panorama/pano-px.jpg",
@@ -78,7 +78,7 @@
       "gaussians": 2769590
     },
     "sphericalHarmonicBands": 3,
-    "limitation": "The two 360 viewpoints load quickly. The first 3D layer now transfers 7.1 MB, then 17.0 MB of detail and 13.5 MB for unrestricted cafe navigation. Physical Pixel 7 loading was reported as long; diagnostics screenshot and timing remain pending",
+    "limitation": "The two 360 viewpoints load quickly. The first 3D layer transfers 7.1 MB, then 13.5 MB to unlock cafe navigation, then 17.0 MB of fine detail. Physical Pixel 7 loading was reported as long; diagnostics screenshot and timing remain pending",
     "loungePanorama": [
       {
         "path": "../../public/maikada/panorama/lounge-px.jpg",
