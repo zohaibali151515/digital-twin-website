@@ -24,11 +24,11 @@ export function createTourDiagnostics(modal) {
       <div><dt>Café full detail</dt><dd data-stat="detail">Waiting</dd></div>
       <div><dt>Lounge 3D data</dt><dd data-stat="lounge">Waiting</dd></div>
       <div><dt>Scene data loaded</dt><dd data-stat="transfer">0.0 MB</dd></div>
-      <div><dt>Network received</dt><dd data-stat="network">0.0 MB</dd></div>
+      <div><dt>Page resources</dt><dd data-stat="network">0.0 MB</dd></div>
       <div><dt>Frame rate</dt><dd data-stat="fps">Waiting</dd></div>
       <div><dt>JS heap</dt><dd data-stat="heap">Unavailable</dd></div>
     </dl>
-    <small>Elapsed from opening the tour. Scene data includes cached files. Network received is the browser's same-origin transfer estimate; cached resources can read as zero. JS heap excludes GPU memory. Nothing is uploaded.</small>
+    <small>Elapsed from opening the tour. Scene data includes cached files. Page resources are browser transfer estimates for page files; they exclude 3D files loaded by the scene worker. JS heap excludes GPU memory. Nothing is uploaded.</small>
     <button class="diagnostics-copy" type="button">Copy results</button>`;
   modal.appendChild(panel);
   const set = (name, value) => { panel.querySelector(`[data-stat="${name}"]`).textContent = value; };

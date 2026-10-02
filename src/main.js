@@ -55,6 +55,9 @@ async function openTour() {
   if (viewer || loading) return;
   loading = true;
   const diagnostics = createTourDiagnostics(modal);
+  const freshToken = new URLSearchParams(location.search).get('diagnostics') === '1'
+    ? new URLSearchParams(location.search).get('freshScene')?.slice(0, 40) : null;
+  const sceneAsset = name => `${import.meta.env.BASE_URL}${name}${freshToken ? `?fresh=${encodeURIComponent(freshToken)}` : ''}`;
   try {
     const [THREE, { OrbitControls }] = await Promise.all([
       import('three'),
@@ -278,7 +281,7 @@ async function openTour() {
     const { SparkRenderer, SplatMesh } = await import('@sparkjsdev/spark');
     scene.add(new SparkRenderer({ renderer }));
     const preview = new SplatMesh({
-      url: `${import.meta.env.BASE_URL}maikada-preview-core.spz`,
+      url: sceneAsset('maikada-preview-core.spz'),
       onProgress: event => {
         diagnostics.assetProgress('core', event);
         if (event.lengthComputable) {
@@ -299,7 +302,7 @@ async function openTour() {
     }
     document.querySelector('#tour-status').textContent = panoramaActive ? 'Finishing 3D room…' : 'Completing room…';
     const remainder = new SplatMesh({
-      url: `${import.meta.env.BASE_URL}maikada-remainder.spz`,
+      url: sceneAsset('maikada-remainder.spz'),
       onProgress: event => diagnostics.assetProgress('room', event)
     });
     viewer.remainder = remainder;
@@ -325,7 +328,7 @@ async function openTour() {
       : 'Café 3D · refining detail';
     const loadTail = async () => {
       const previewTail = new SplatMesh({
-        url: `${import.meta.env.BASE_URL}maikada-preview-tail.spz`,
+        url: sceneAsset('maikada-preview-tail.spz'),
         onProgress: event => diagnostics.assetProgress('detail', event)
       });
       viewer.previewTail = previewTail;
@@ -343,7 +346,7 @@ async function openTour() {
     };
     const loadUpper = async () => {
       const upper = new SplatMesh({
-        url: `${import.meta.env.BASE_URL}maikada-upper.spz`,
+        url: sceneAsset('maikada-upper.spz'),
         onProgress: event => diagnostics.assetProgress('lounge', event)
       });
       viewer.upper = upper;
