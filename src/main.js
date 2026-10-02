@@ -53,7 +53,8 @@ const modal = document.querySelector('#tour-modal');
 async function openTour() {
   modal.hidden = false;
   document.body.classList.add('modal-open');
-  if (viewer || loading) return;
+  if (viewer) { viewer.resumeRendering(); return; }
+  if (loading) return;
   loading = true;
   const diagnostics = createTourDiagnostics(modal);
   const freshToken = new URLSearchParams(location.search).get('diagnostics') === '1'
@@ -187,7 +188,7 @@ async function openTour() {
       document.querySelector('#tour-status').textContent = `360 ${name === 'cafe' ? 'café' : 'lounge'} · loading 3D`;
       document.querySelector('.tour-hint').textContent = '360 preview · Drag to look around while the 3D walkthrough loads';
     };
-    renderer.setAnimationLoop(() => {
+    const renderFrame = () => {
       if (modal.hidden) return;
       navigation.update();
       const frameNow = performance.now();
@@ -264,7 +265,8 @@ async function openTour() {
           qualityFrames = 0;
         }
       }
-    });
+    };
+    renderer.setAnimationLoop(modal.hidden ? null : renderFrame);
     const resize = () => {
       camera.aspect = target.clientWidth / target.clientHeight;
       camera.fov = target.clientWidth < 600 ? 95 : 70;
@@ -273,6 +275,8 @@ async function openTour() {
     };
     window.addEventListener('resize', resize);
     viewer = { renderer, scene, camera, controls, navigation, resize, showPanoramaRoom,
+      pauseRendering() { renderer.setAnimationLoop(null); },
+      resumeRendering() { renderer.setAnimationLoop(renderFrame); },
       get panoramaActive() { return panoramaActive; },
       get roomReady() { return roomReady; },
       get upperReady() { return upperReady; },
@@ -403,6 +407,7 @@ function closeTour() {
   document.body.classList.remove('modal-open');
   viewer?.navigation.resetInput();
   viewer?.resetMotion();
+  viewer?.pauseRendering();
   document.querySelector('#tour-help-panel').hidden = true;
   document.querySelector('#tour-help').setAttribute('aria-expanded', 'false');
 }
