@@ -1,6 +1,6 @@
 // Six views rendered from the Maikada scan at the entry camera position.
 // The skybox follows the camera, so it offers rotation only until 3D is ready.
-export async function createTourPanorama(THREE, baseUrl) {
+export async function createTourPanorama(THREE, baseUrl, prefix = 'pano') {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#101517');
   const group = new THREE.Group();
@@ -16,7 +16,7 @@ export async function createTourPanorama(THREE, baseUrl) {
   ];
   const geometry = new THREE.PlaneGeometry(2, 2);
   const textures = await Promise.all(faces.map(async ([name]) => {
-    const texture = await loader.loadAsync(`${baseUrl}maikada/panorama/pano-${name}.jpg`);
+    const texture = await loader.loadAsync(`${baseUrl}maikada/panorama/${prefix}-${name}.jpg`);
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;

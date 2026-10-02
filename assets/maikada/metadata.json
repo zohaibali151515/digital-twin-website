@@ -11,7 +11,7 @@
   },
   "web": {
     "status": "published",
-    "strategy": "Scan-rendered 360-degree entry preview, camera-first SH3 SPZ preview, first-room complement, then upper room, rendered with Spark 2.2",
+    "strategy": "Scan-rendered 360-degree cafe and on-demand lounge previews, camera-first SH3 SPZ preview, first-room complement, then upper room, rendered with Spark 2.2",
     "panorama": [
       {
         "path": "../../public/maikada/panorama/pano-px.jpg",
@@ -72,6 +72,38 @@
       "gaussians": 2769590
     },
     "sphericalHarmonicBands": 3,
-    "limitation": "The 24.2 MB opening view still takes time on mobile data; full navigation waits for its 13.5 MB complement. Physical phone validation remains open"
+    "limitation": "The two 360 viewpoints load quickly, but full 3D still transfers 24.2 MB for the first view and another 13.5 MB for unrestricted cafe navigation. Physical Pixel 7 loading was reported as long; diagnostics screenshot and timing remain pending",
+    "loungePanorama": [
+      {
+        "path": "../../public/maikada/panorama/lounge-px.jpg",
+        "bytes": 192554,
+        "sha256": "5137287cb2e8201595fe6743d452fdf9119ad549e74073099a607a8df1b2fc86"
+      },
+      {
+        "path": "../../public/maikada/panorama/lounge-nx.jpg",
+        "bytes": 178898,
+        "sha256": "8e2f6d1ca4a665b261b068acd4608985139a20f395681a3146ec2cb6adefa52f"
+      },
+      {
+        "path": "../../public/maikada/panorama/lounge-pz.jpg",
+        "bytes": 192878,
+        "sha256": "0a62009a66fba5c8cbe6d4834e20023ed415d93c0c01b90ae165fa404d7a5159"
+      },
+      {
+        "path": "../../public/maikada/panorama/lounge-nz.jpg",
+        "bytes": 184147,
+        "sha256": "d09b29b089192de8ce5274ff0046b97d52d4a6ce83fe09361df6cee93a351c8e"
+      },
+      {
+        "path": "../../public/maikada/panorama/lounge-py.jpg",
+        "bytes": 118020,
+        "sha256": "99248f453f7283346cfa37162e67c7009ff6a1b02ed2831400341747d3010847"
+      },
+      {
+        "path": "../../public/maikada/panorama/lounge-ny.jpg",
+        "bytes": 196518,
+        "sha256": "f691cc5a57aa55389a91d5b93c00c7d6dbfe96446254365523a50828c326b662"
+      }
+    ]
   }
 }

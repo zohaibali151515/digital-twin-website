@@ -81,9 +81,14 @@ async function openTour() {
       console.warn('Panorama unavailable; opening 3D scene directly:', error);
     }
     let panoramaActive = Boolean(panorama);
+    let panoramaRoom = 'cafe';
+    let panoramaLoading = false;
     let scanHasPixels = false;
+    let loungeHasPixels = false;
+    let loungeVisibleFrames = 0;
     let previewReady = false;
     let roomReady = false;
+    let upperReady = false;
     const gl = renderer.getContext();
     const pixel = new Uint8Array(4);
     controls.enableZoom = false;
@@ -101,8 +106,11 @@ async function openTour() {
     const viewDirection = new THREE.Vector3();
     const show3D = () => {
       if (!panoramaActive) return;
+      if (panoramaRoom === 'cafe' && !scanHasPixels) return;
+      if (panoramaRoom === 'lounge' && !loungeHasPixels) return;
       panoramaActive = false;
-      panorama.dispose();
+      panorama?.dispose();
+      panorama = undefined;
       diagnostics.mark('threeD');
       qualityReady = true;
       if (!roomReady) {
@@ -112,7 +120,51 @@ async function openTour() {
         controls.maxPolarAngle = Math.PI / 2 + 0.07;
         document.querySelector('#tour-status').textContent = 'Completing room…';
         document.querySelector('.tour-hint').textContent = 'Look around · Full navigation is loading';
+      } else {
+        document.querySelector('#tour-status').textContent = upperReady ? 'LIVE 3D' : 'Café 3D ready';
+        document.querySelector('.tour-hint').textContent = 'Drag to orbit / Scroll or pinch to zoom / Right drag or two fingers to pan';
       }
+    };
+    const showPanoramaRoom = async name => {
+      if (panoramaLoading) return;
+      if ((name === 'cafe' && roomReady && panoramaRoom === 'cafe' && scanHasPixels)
+        || (name === 'lounge' && loungeHasPixels)) {
+        panoramaRoom = name;
+        const position = name === 'cafe' ? [0, -3.5, 2] : [1, 0, 2];
+        const lookAt = name === 'cafe' ? [1, -3.5, 2] : [2, 0, 2];
+        camera.position.set(...position);
+        controls.target.set(...lookAt);
+        controls.update();
+        navigation.syncLook();
+        show3D();
+        roomButtons.forEach(button => button.setAttribute('aria-pressed', String(button === (name === 'cafe' ? roomButtons[0] : roomButtons[1]))));
+        return;
+      }
+      if (!panoramaActive || panoramaRoom !== name) {
+        panoramaLoading = true;
+        document.querySelector('#tour-status').textContent = `Opening ${name === 'cafe' ? 'café' : 'lounge'} preview…`;
+        try {
+          const next = await createTourPanorama(THREE, import.meta.env.BASE_URL, name === 'cafe' ? 'pano' : 'lounge');
+          panorama?.dispose();
+          panorama = next;
+          panoramaActive = true;
+          if (name === 'cafe' && panoramaRoom !== 'cafe') scanHasPixels = false;
+          panoramaRoom = name;
+          if (name === 'lounge') diagnostics.mark('lounge360');
+        } catch (error) {
+          console.error('Could not open panorama room:', error);
+          document.querySelector('#tour-status').textContent = 'Preview unavailable';
+          return;
+        } finally { panoramaLoading = false; }
+      }
+      navigation.setMode('orbit');
+      camera.position.set(...(name === 'cafe' ? [0, -3.5, 2] : [1, 0, 2]));
+      controls.target.set(...(name === 'cafe' ? [1, -3.5, 2] : [2, 0, 2]));
+      controls.update();
+      navigation.syncLook();
+      roomButtons.forEach(button => button.setAttribute('aria-pressed', String(button === (name === 'cafe' ? roomButtons[0] : roomButtons[1]))));
+      document.querySelector('#tour-status').textContent = `360 ${name === 'cafe' ? 'café' : 'lounge'} · loading 3D`;
+      document.querySelector('.tour-hint').textContent = '360 preview · Drag to look around while the 3D walkthrough loads';
     };
     renderer.setAnimationLoop(() => {
       if (modal.hidden) return;
@@ -122,18 +174,29 @@ async function openTour() {
         camera.getWorldDirection(viewDirection);
         const facingEntry = viewDirection.x > Math.cos(0.12);
         const now = performance.now();
-        if (previewReady && facingEntry && !scanHasPixels && now - lastScanProbe > 150) {
+        const probeEntry = previewReady && panoramaRoom === 'cafe' && facingEntry && !scanHasPixels;
+        const probeLounge = upperReady && panoramaRoom === 'lounge' && !loungeHasPixels;
+        if ((probeEntry || probeLounge) && now - lastScanProbe > 150) {
           lastScanProbe = now;
           renderer.render(scene, camera);
-          for (const [x, y] of [[0.5, 0.5], [0.35, 0.5], [0.65, 0.5]]) {
-            gl.readPixels(Math.floor(renderer.domElement.width * x), Math.floor(renderer.domElement.height * y), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
-            if (Math.abs(pixel[0] - 16) + Math.abs(pixel[1] - 21) + Math.abs(pixel[2] - 23) > 60) {
-              scanHasPixels = true;
-              break;
+          if (probeEntry) {
+            for (const [x, y] of [[0.5, 0.5], [0.35, 0.5], [0.65, 0.5]]) {
+              gl.readPixels(Math.floor(renderer.domElement.width * x), Math.floor(renderer.domElement.height * y), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+              if (Math.abs(pixel[0] - 16) + Math.abs(pixel[1] - 21) + Math.abs(pixel[2] - 23) > 60) {
+                scanHasPixels = true;
+                break;
+              }
             }
+          }
+          if (probeLounge) {
+            gl.readPixels(Math.floor(renderer.domElement.width * 0.5), Math.floor(renderer.domElement.height * 0.75), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+            loungeVisibleFrames = Math.abs(pixel[0] - 16) + Math.abs(pixel[1] - 21) + Math.abs(pixel[2] - 23) > 90
+              ? loungeVisibleFrames + 1 : 0;
+            loungeHasPixels = loungeVisibleFrames >= 3;
           }
         }
         if (previewReady && facingEntry && scanHasPixels) show3D();
+        if (loungeHasPixels && panoramaRoom === 'lounge') show3D();
         if (panoramaActive) {
           panorama.update(camera);
           renderer.render(panorama.scene, camera);
@@ -163,7 +226,15 @@ async function openTour() {
       renderer.setSize(target.clientWidth, target.clientHeight);
     };
     window.addEventListener('resize', resize);
-    viewer = { renderer, scene, camera, controls, navigation, resize };
+    viewer = { renderer, scene, camera, controls, navigation, resize, showPanoramaRoom,
+      get panoramaActive() { return panoramaActive; },
+      get roomReady() { return roomReady; },
+      get upperReady() { return upperReady; } };
+    if (panoramaActive) {
+      roomButtons[1].disabled = false;
+      roomButtons[1].textContent = 'Lounge (360)';
+      roomButtons[1].title = 'Open fast 360 lounge preview';
+    }
     const { SparkRenderer, SplatMesh } = await import('@sparkjsdev/spark');
     scene.add(new SparkRenderer({ renderer }));
     const preview = new SplatMesh({
@@ -201,17 +272,24 @@ async function openTour() {
     controls.enableZoom = true;
     document.querySelector('#tour-explore').disabled = false;
     document.querySelector('#tour-fly').disabled = false;
-    document.querySelector('.tour-hint').textContent = 'Drag to orbit / Scroll or pinch to zoom / Right drag or two fingers to pan';
-    document.querySelector('#tour-status').textContent = 'Loading lounge…';
+    document.querySelector('.tour-hint').textContent = panoramaActive
+      ? '360 preview · Drag to look around while the 3D walkthrough loads'
+      : 'Drag to orbit / Scroll or pinch to zoom / Right drag or two fingers to pan';
+    document.querySelector('#tour-status').textContent = panoramaActive && panoramaRoom === 'lounge'
+      ? '360 lounge · full 3D loading'
+      : 'Café 3D ready';
     const upper = new SplatMesh({ url: `${import.meta.env.BASE_URL}maikada-upper.spz` });
     viewer.upper = upper;
     scene.add(upper);
     try {
       await upper.initialized;
+      upperReady = true;
       diagnostics.mark('lounge');
+      roomButtons[1].textContent = 'Lounge';
       document.querySelector('#tour-lounge').disabled = false;
       document.querySelector('#tour-lounge').title = 'Explore the lounge';
-      document.querySelector('#tour-status').textContent = 'LIVE 3D';
+      document.querySelector('#tour-status').textContent = panoramaActive && panoramaRoom === 'lounge' ? 'Finishing lounge 3D…' : 'LIVE 3D';
+      show3D();
     } catch (error) {
       console.error('Could not load lounge:', error);
       scene.remove(upper);
@@ -250,8 +328,14 @@ function goToRoom(position, target, activeButton) {
   viewer.navigation.setRoom(activeButton === roomButtons[1] ? 'lounge' : 'cafe');
   roomButtons.forEach(button => button.setAttribute('aria-pressed', String(button === activeButton)));
 }
-roomButtons[0].addEventListener('click', () => goToRoom([0, -3.5, 2], [1, -3.5, 2], roomButtons[0]));
-roomButtons[1].addEventListener('click', () => goToRoom([1, 0, 2], [2, 0, 2], roomButtons[1]));
+roomButtons[0].addEventListener('click', () => {
+  if (viewer?.panoramaActive) viewer.showPanoramaRoom('cafe');
+  else goToRoom([0, -3.5, 2], [1, -3.5, 2], roomButtons[0]);
+});
+roomButtons[1].addEventListener('click', () => {
+  if (viewer?.upperReady) goToRoom([1, 0, 2], [2, 0, 2], roomButtons[1]);
+  else viewer?.showPanoramaRoom('lounge');
+});
 document.querySelector('#tour-orbit').addEventListener('click', () => viewer?.navigation.setMode('orbit'));
 document.querySelector('#tour-explore').addEventListener('click', () => viewer?.navigation.setMode('explore'));
 document.querySelector('#tour-fly').addEventListener('click', () => viewer?.navigation.setMode('fly'));

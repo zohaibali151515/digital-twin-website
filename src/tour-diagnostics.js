@@ -16,9 +16,10 @@ export function createTourDiagnostics(modal) {
     <strong>Viewer diagnostics</strong>
     <dl>
       <div><dt>360 preview</dt><dd data-stat="preview">Waiting</dd></div>
-      <div><dt>First 3D</dt><dd data-stat="threeD">Waiting</dd></div>
-      <div><dt>Café ready</dt><dd data-stat="room">Waiting</dd></div>
-      <div><dt>Lounge ready</dt><dd data-stat="lounge">Waiting</dd></div>
+      <div><dt>Lounge 360</dt><dd data-stat="lounge360">Not opened</dd></div>
+      <div><dt>3D shown</dt><dd data-stat="threeD">Waiting</dd></div>
+      <div><dt>Café 3D data</dt><dd data-stat="room">Waiting</dd></div>
+      <div><dt>Lounge 3D data</dt><dd data-stat="lounge">Waiting</dd></div>
       <div><dt>Frame rate</dt><dd data-stat="fps">Waiting</dd></div>
       <div><dt>JS heap</dt><dd data-stat="heap">Unavailable</dd></div>
     </dl>

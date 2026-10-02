@@ -9,7 +9,9 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color('#101517');
 scene.add(new SparkRenderer({ renderer }));
 const camera = new THREE.PerspectiveCamera(90, 1, 0.02, 200);
-camera.position.set(0, -3.5, 2);
+const origin = new URLSearchParams(location.search).get('origin')?.split(',').map(Number) || [0, -3.5, 2];
+if (origin.length !== 3 || origin.some(value => !Number.isFinite(value))) throw new Error('Invalid panorama origin');
+camera.position.set(...origin);
 const meshes = ['maikada-preview.spz', 'maikada-remainder.spz', 'maikada-upper.spz'].map(name => {
   const mesh = new SplatMesh({ url: `/${name}` });
   scene.add(mesh);

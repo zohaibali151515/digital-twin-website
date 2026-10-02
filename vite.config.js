@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 
 export default defineConfig({
   base: './',
+  server: { watch: { ignored: ['**/.tools/**', '**/assets/maikada/web/**'] } },
   build: {
     rollupOptions: {
       input: {
