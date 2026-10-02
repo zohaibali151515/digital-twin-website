@@ -38,7 +38,7 @@
 .tour-move [data-move="up"],.tour-move [data-move="down"]{display:none;font-size:12px;font-weight:700}
 .tour-move [data-move="up"]{grid-column:1;grid-row:3}
 .tour-move [data-move="down"]{grid-column:3;grid-row:3}
-@media(max-width:700px){.tour-controls{right:12px;bottom:12px;max-width:58%;gap:5px}.tour-controls button{padding:9px 10px}.tour-hint{bottom:12px;max-width:39%}.tour-help{right:12px;bottom:190px}.tour-modal[data-nav-mode="explore"] .tour-move,.tour-modal[data-nav-mode="fly"] .tour-move{display:grid}.tour-modal[data-nav-mode="fly"] .tour-move [data-move="up"],.tour-modal[data-nav-mode="fly"] .tour-move [data-move="down"]{display:block}.tour-modal[data-nav-mode="explore"] .tour-hint,.tour-modal[data-nav-mode="fly"] .tour-hint{display:none}}
+@media(max-width:700px),(pointer:coarse){.tour-controls{right:12px;bottom:12px;max-width:58%;gap:5px}.tour-controls button{padding:9px 10px}.tour-hint{bottom:12px;max-width:39%}.tour-help{right:12px;bottom:190px}.tour-modal[data-nav-mode="explore"] .tour-move,.tour-modal[data-nav-mode="fly"] .tour-move{display:grid}.tour-modal[data-nav-mode="fly"] .tour-move [data-move="up"],.tour-modal[data-nav-mode="fly"] .tour-move [data-move="down"]{display:block}.tour-modal[data-nav-mode="explore"] .tour-hint,.tour-modal[data-nav-mode="fly"] .tour-hint{display:none}}
 
 .tour-diagnostics{position:absolute;z-index:5;top:84px;right:16px;width:210px;max-width:calc(100vw - 32px);padding:13px 14px;background:#101817ed;border:1px solid #9eaa9f;color:#f4f5ef;box-shadow:0 12px 36px #0007;font-size:11px;line-height:1.35;pointer-events:none}
 .tour-diagnostics strong{display:block;font:600 14px 'Space Grotesk',sans-serif;margin-bottom:9px}
