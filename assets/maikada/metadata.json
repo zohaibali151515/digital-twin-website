@@ -11,7 +11,7 @@
   },
   "web": {
     "status": "published",
-    "strategy": "Scan-rendered 360-degree cafe and on-demand lounge previews, 700K camera-first SH3 core, lossless preview complement, first-room complement, then upper room, rendered with Spark 2.2",
+    "strategy": "Scan-rendered 360-degree cafe and on-demand lounge previews, 350K camera-first SH3 core, lossless preview complement, first-room complement, then upper room, rendered with Spark 2.2",
     "panorama": [
       {
         "path": "../../public/maikada/panorama/pano-px.jpg",
@@ -47,15 +47,15 @@
     "tiles": [
       {
         "path": "../../public/maikada-preview-core.spz",
-        "bytes": 14696359,
-        "sha256": "24dccfec33a38efa099a814910e11ab1f54c7e196db2bb62241c15eda9fa6cf4",
-        "gaussians": 700000
+        "bytes": 7144758,
+        "sha256": "ee860bb80f4210577cc72ea9f659df4bcb9143db11d70a72626e24384c74917d",
+        "gaussians": 350000
       },
       {
         "path": "../../public/maikada-preview-tail.spz",
-        "bytes": 9495963,
-        "sha256": "ce78a244218bb593ea975498ae3e1a83c0714c88a24b8ec7bb14cd2c4349af50",
-        "gaussians": 460652
+        "bytes": 17012924,
+        "sha256": "f13eb3fdbabb70a830cb665cdb3bbd1ebe0e8d4a48e11231ed34ed936d9ad312",
+        "gaussians": 810652
       },
       {
         "path": "../../public/maikada-remainder.spz",
@@ -78,7 +78,7 @@
       "gaussians": 2769590
     },
     "sphericalHarmonicBands": 3,
-    "limitation": "The two 360 viewpoints load quickly. The first 3D layer now transfers 14.7 MB, then 9.5 MB of detail and 13.5 MB for unrestricted cafe navigation. Physical Pixel 7 loading was reported as long; diagnostics screenshot and timing remain pending",
+    "limitation": "The two 360 viewpoints load quickly. The first 3D layer now transfers 7.1 MB, then 17.0 MB of detail and 13.5 MB for unrestricted cafe navigation. Physical Pixel 7 loading was reported as long; diagnostics screenshot and timing remain pending",
     "loungePanorama": [
       {
         "path": "../../public/maikada/panorama/lounge-px.jpg",

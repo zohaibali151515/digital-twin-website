@@ -27,7 +27,7 @@ screen_radius = scale / distance
 score = alpha * np.minimum(screen_radius, 0.035)
 # Keep the strongest visible contributors in the first layer; every other
 # Gaussian stays in the complement, so the combined model is lossless.
-target = 700000
+target = 350000
 chosen = np.argpartition(score, -target)[-target:]
 mask = np.zeros(count, dtype=bool)
 mask[chosen] = True
