@@ -197,8 +197,12 @@ async function openTour() {
         && frameNow - lastInteraction > 1000 && !cameraMoved;
       if (idle && frameNow - lastRenderedAt < 400) return;
       if (smoothMotion && detailReady && viewer?.previewTail) {
-        viewer.previewTail.visible = heldPointers.size === 0 && !navigation.isMoving
-          && performance.now() - lastInteraction > 500;
+        const moving = heldPointers.size > 0 || navigation.isMoving
+          || frameNow - lastInteraction <= 500;
+        viewer.previewTail.visible = !moving;
+        if (viewer.upper && upperReady) {
+          viewer.upper.visible = !moving || camera.position.y >= -1.5;
+        }
       }
       if (panoramaActive) {
         camera.getWorldDirection(viewDirection);
@@ -272,7 +276,12 @@ async function openTour() {
       get roomReady() { return roomReady; },
       get upperReady() { return upperReady; },
       get smoothMotion() { return smoothMotion; },
-      resetMotion() { heldPointers.clear(); lastInteraction = 0; if (viewer?.previewTail) viewer.previewTail.visible = true; } };
+      resetMotion() {
+        heldPointers.clear();
+        lastInteraction = 0;
+        if (viewer?.previewTail) viewer.previewTail.visible = true;
+        if (viewer?.upper) viewer.upper.visible = true;
+      } };
     if (panoramaActive) {
       roomButtons[1].disabled = false;
       roomButtons[1].textContent = 'Lounge (360)';
